@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@theme { --color-brand: #055cf5; --color-ink: #081430; --color-muted: #61708c; --color-line: #d9e3f2; --color-wash: #f5faff; --color-tint: #e8f2ff; --color-success: #08a663; --font-sans: 'Inter', sans-serif; }
+body { margin: 0; background: #f5faff; color: #081430; font-size: 14px; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button, a { touch-action: manipulation; }
+button:not(:disabled), select { cursor: pointer; }
+button, a, input, select, textarea { outline-offset: 4px; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #055cf5; }
+input,select,textarea { min-width: 0; }
+@layer components {
+ .panel { @apply rounded-2xl border border-line bg-white p-[22px]; }
+ .btn { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50; }
+ .btn-secondary { @apply border border-line bg-white text-brand hover:bg-tint; }
+ .chip { @apply inline-flex items-center rounded-full bg-tint px-3.5 py-2 text-xs font-medium text-brand; }
+ .field { @apply w-full rounded-xl border border-line bg-wash px-4 py-3.5 text-sm; }
+ .muted { @apply text-[13px] leading-relaxed text-muted; }
+}
+@media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
