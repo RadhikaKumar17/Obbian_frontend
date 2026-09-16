@@ -11,7 +11,7 @@ export default function VehicleScreen() {
   return (
     <>
       <Header
-        title={car.name}
+        title={car?.name ?? "Vehicle"}
         subtitle="Review availability, pickup and pricing"
       />
       <div className="grid gap-6 lg:grid-cols-[1.57fr_1fr]">

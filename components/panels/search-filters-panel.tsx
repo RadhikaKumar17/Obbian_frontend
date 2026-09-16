@@ -8,11 +8,11 @@ import Panel from "@/components/ui/panel";
 import { localDate, tomorrow } from "@/lib/data";
 
 export default function SearchFiltersPanel() {
-  const { date, setDate, radius, setRadius, budget, setBudget } = useObbian();
+  const { date, setDate, radius, setRadius, budget, setBudget, config, userLocation, locateMe, locating } = useObbian();
   return (
     <Panel className="mb-[22px] !py-3">
       <div className="flex flex-wrap items-center gap-x-7 gap-y-3">
-        <span className="font-medium">New Delhi</span>
+        <span className="font-medium">{config?.city}</span>
         <label className="flex items-center gap-2 text-sm">
           <span className="sr-only">Pickup date</span>
           <Input
@@ -29,12 +29,11 @@ export default function SearchFiltersPanel() {
           value={radius}
           onChange={setRadius}
           className="rounded-lg p-1"
-          options={[
-            { value: "10", label: "10 km radius" },
-            { value: "3", label: "3 km radius" },
-            { value: "5", label: "5 km radius" },
-          ]}
+          options={config?.radiusOptions ?? []}
         />
+        <button type="button" onClick={locateMe} disabled={locating} className="chip text-brand disabled:opacity-50">
+          {locating ? "Locating…" : userLocation ? "📍 Using your location" : "📍 Use my location"}
+        </button>
       </div>
       <div className="mt-3 flex flex-wrap gap-5 sm:gap-20">
         <Chip>SUV</Chip>
@@ -44,12 +43,7 @@ export default function SearchFiltersPanel() {
           value={budget}
           onChange={setBudget}
           className="chip"
-          options={[
-            { value: "3000", label: "Under ₹3,000/day" },
-            { value: "2700", label: "Under ₹2,700/day" },
-            { value: "2500", label: "Under ₹2,500/day" },
-            { value: "2000", label: "Under ₹2,000/day" },
-          ]}
+          options={config?.budgetOptions ?? []}
         />
       </div>
     </Panel>

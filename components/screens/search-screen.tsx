@@ -8,7 +8,7 @@ import Header from "@/components/ui/header";
 import Link from "next/link";
 
 export default function SearchScreen() {
-  const { sort, setSort, results } = useObbian();
+  const { sort, setSort, results, config } = useObbian();
   return (
     <>
       <Header
@@ -25,11 +25,7 @@ export default function SearchScreen() {
           value={sort}
           onChange={setSort}
           className="rounded-lg border border-line bg-white p-2"
-          options={[
-            { value: "recommended", label: "Recommended" },
-            { value: "price", label: "Price: low to high" },
-            { value: "rating", label: "Highest rated" },
-          ]}
+          options={config?.sortOptions ?? []}
         />
       </div>
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">

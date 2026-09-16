@@ -12,7 +12,7 @@ export default function ConfirmationScreen() {
     <>
       <Header
         title="Reservation confirmed"
-        subtitle={`Your ${bookedCar.name} is ready for ${booking ? dateLabel(booking.date).toLowerCase() : "your trip"}`}
+        subtitle={`Your ${bookedCar?.name ?? "vehicle"} is ready for ${booking ? dateLabel(booking.date).toLowerCase() : "your trip"}`}
       />
       {booking ? (
         <ConfirmationPanel />

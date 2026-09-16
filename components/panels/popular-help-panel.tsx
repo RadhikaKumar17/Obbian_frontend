@@ -2,10 +2,11 @@
 
 import { useObbian } from "@/components/obbian-provider";
 import Panel from "@/components/ui/panel";
-import { policies } from "@/lib/data";
+import { usePolicies } from "@/hooks/use-policies";
 
 export default function PopularHelpPanel() {
   const { helpQuery, faq, setFaq } = useObbian();
+  const policies = usePolicies().data ?? [];
   return (
     <Panel>
       <h2 className="mb-5 text-lg font-semibold">Popular help</h2>

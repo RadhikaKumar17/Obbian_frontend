@@ -4,10 +4,9 @@ import { useObbian } from "@/components/obbian-provider";
 import EmptySavedPanel from "@/components/panels/empty-saved-panel";
 import VehicleCard from "@/components/panels/vehicle-card";
 import Header from "@/components/ui/header";
-import { vehicles } from "@/lib/data";
 
 export default function SavedScreen() {
-  const { saved } = useObbian();
+  const { saved, vehicles } = useObbian();
   return (
     <>
       <Header

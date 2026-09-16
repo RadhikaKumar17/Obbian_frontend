@@ -9,12 +9,12 @@ import type { Vehicle } from "@/lib/data";
 import { dateLabel, money } from "@/lib/data";
 
 export default function VehicleCard({ v, savedView = false }: { v: Vehicle; savedView?: boolean }) {
-  const { saved, date, select, toggleSave } = useObbian();
+  const { saved, date, select, toggleSave, recommendedId } = useObbian();
   return (
     <Panel className="flex flex-col !p-[18px]">
       <CarVisual />
       <div className="mt-4 flex min-h-8 items-center justify-between">
-        {!savedView && v.id === "creta" ? (
+        {!savedView && v.id === recommendedId ? (
           <Chip>AI recommended</Chip>
         ) : (
           <span />
@@ -55,7 +55,7 @@ export default function VehicleCard({ v, savedView = false }: { v: Vehicle; save
             ? v.available
               ? "Reserve now"
               : "Check dates"
-            : v.id === "creta"
+            : v.id === recommendedId
               ? "View details"
               : "Select"}
         </button>

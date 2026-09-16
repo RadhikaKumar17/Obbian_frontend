@@ -15,12 +15,12 @@ export default function ConfirmationPanel() {
         Booking {booking.id} {booking.status.toLowerCase()}
       </h2>
       <p className="mt-5 text-[15px]">
-        {bookedCar.name} · {dateLabel(booking.date)} · 10:00 AM
+        {bookedCar?.name} · {dateLabel(booking.date)} · {booking.timeLabel}
       </p>
       <p className="my-12">
-        Pickup: Connaught Place, New Delhi{" "}
+        Pickup: {booking.pickup}{" "}
         <span className="ml-5 font-semibold">
-          {money(booking.total)} · demo payment
+          {money(booking.total)} · {booking.paymentStatus}
         </span>
       </p>
       <div className="flex flex-wrap justify-center gap-5">

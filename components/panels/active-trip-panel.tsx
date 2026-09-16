@@ -8,38 +8,35 @@ import Panel from "@/components/ui/panel";
 import { dateLabel } from "@/lib/data";
 
 export default function ActiveTripPanel() {
-  const { date, distance, setDistance, paused, setPaused, booking, bookedCar } = useObbian();
+  const { date, tracking, booking, bookedCar, config, completeBooking, completing, setToast, router } = useObbian();
   return (
     <Panel className="flex flex-col">
-      <h2 className="text-xl font-semibold">{bookedCar.name}</h2>
+      <h2 className="text-xl font-semibold">{bookedCar?.name}</h2>
       <div className="mt-5">
-        <Chip>
-          {distance === 0 ? "Vehicle arrived" : "Driver en route"}
-        </Chip>
+        <Chip>{booking?.status === "Active" ? "Trip in progress" : (tracking?.status ?? "Awaiting location")}</Chip>
       </div>
       <p className="mt-8">
         Pickup{" "}
-        {booking
-          ? dateLabel(booking.date).toLowerCase()
-          : dateLabel(date).toLowerCase()}
-        , 10:00 AM
+        {booking ? dateLabel(booking.date).toLowerCase() : dateLabel(date).toLowerCase()}
+        {config ? `, ${config.pickupTime}` : ""}
       </p>
-      <p className="mt-8">
-        Rajiv Chowk ·{" "}
-        {distance === 0 ? "arrived" : paused ? "paused" : "moving"}
-      </p>
-      <div className="mt-6">
-        <Button
-          secondary
-          onClick={() => {
-            if (distance === 0) setDistance(2.1);
-            setPaused(!paused);
-          }}
-        >
-          {paused ? "Resume tracking" : "Pause tracking"}
-        </Button>
-      </div>
+      <p className="mt-8">{booking?.pickup ?? bookedCar?.pickup}</p>
       <div className="mt-auto flex flex-col gap-4 pt-12">
+        {booking?.status === "Active" && (
+          <Button
+            onClick={() => {
+              completeBooking(booking.id)
+                .then(() => {
+                  setToast("Trip completed");
+                  router.push("/trips");
+                })
+                .catch((error) => setToast(error instanceof Error ? error.message : "Something went wrong."));
+            }}
+            disabled={completing}
+          >
+            {completing ? "Completing…" : "Complete trip"}
+          </Button>
+        )}
         <Go href="/support">Contact support</Go>
         <Go href="/" secondary>
           Back to Discover

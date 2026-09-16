@@ -1,11 +1,13 @@
 "use client";
 
+import { useObbian } from "@/components/obbian-provider";
 import Dropdown from "@/components/ui/dropdown";
 import Input from "@/components/ui/input";
 import Panel from "@/components/ui/panel";
 import Link from "next/link";
 
 export default function DriverDetailsPanel() {
+  const { config } = useObbian();
   return (
     <Panel>
       <h2 className="mb-6 text-xl font-semibold">Driver details</h2>
@@ -50,18 +52,16 @@ export default function DriverDetailsPanel() {
           <Dropdown
             id="payment-method"
             aria-label="Payment method"
-            name="payment"
-            defaultValue="visa"
+            name="paymentMethod"
+            defaultValue={config?.paymentMethods[0]?.value}
             className="field mt-2"
-            options={[
-              { value: "visa", label: "Demo Visa •••• 4242" },
-              { value: "upi", label: "Demo UPI" },
-            ]}
+            options={config?.paymentMethods ?? []}
           />
         </div>
         <label className="flex items-center gap-3">
           <Input
             type="checkbox"
+            name="termsAccepted"
             required
             className="size-4 accent-brand"
           />

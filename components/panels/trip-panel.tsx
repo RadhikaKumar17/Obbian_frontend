@@ -4,11 +4,11 @@ import { useObbian } from "@/components/obbian-provider";
 import Button from "@/components/ui/button";
 import Chip from "@/components/ui/chip";
 import Panel from "@/components/ui/panel";
-import type { Booking, Vehicle } from "@/lib/data";
+import type { Booking } from "@/lib/data";
 import { dateLabel } from "@/lib/data";
 
-export default function TripPanel({ b, v }: { b: Booking; v: Vehicle }) {
-  const { router, setSelectedBooking, setManage, setNewDate, setDistance, setPaused, receipt } = useObbian();
+export default function TripPanel({ b }: { b: Booking }) {
+  const { router, setSelectedBooking, setManage, setNewDate, receipt, completeBooking, completing, setToast } = useObbian();
   return (
     <Panel>
       <div className="flex gap-5 sm:gap-8">
@@ -21,16 +21,16 @@ export default function TripPanel({ b, v }: { b: Booking; v: Vehicle }) {
         </span>
         <div className="min-w-0 flex-1">
           <h2 className="text-[22px] font-semibold">
-            {v.name}
+            {b.vehicleName}
           </h2>
           <div className="mt-3">
             <Chip>{b.status}</Chip>
           </div>
           <p className="mt-6">
-            {dateLabel(b.date)} · 10:00 AM – 8:00 PM
+            {dateLabel(b.date)} · {b.timeLabel}
           </p>
           <p className="muted mt-3">
-            Connaught Place · Booking {b.id}
+            {b.pickup} · Booking {b.id}
           </p>
           <div className="mt-7 flex flex-wrap gap-4">
             {["Confirmed", "Active"].includes(b.status) ? (
@@ -38,22 +38,34 @@ export default function TripPanel({ b, v }: { b: Booking; v: Vehicle }) {
                 <Button
                   onClick={() => {
                     setSelectedBooking(b.id);
-                    setDistance(2.1);
-                    setPaused(false);
                     router.push("/tracking");
                   }}
                 >
                   Track vehicle
                 </Button>
-                <Button
-                  secondary
-                  onClick={() => {
-                    setManage(b);
-                    setNewDate(b.date);
-                  }}
-                >
-                  Manage booking
-                </Button>
+                {b.status === "Confirmed" ? (
+                  <Button
+                    secondary
+                    onClick={() => {
+                      setManage(b);
+                      setNewDate(b.date);
+                    }}
+                  >
+                    Manage booking
+                  </Button>
+                ) : (
+                  <Button
+                    secondary
+                    disabled={completing}
+                    onClick={() => {
+                      completeBooking(b.id)
+                        .then(() => setToast("Trip completed"))
+                        .catch((error) => setToast(error instanceof Error ? error.message : "Something went wrong."));
+                    }}
+                  >
+                    {completing ? "Completing…" : "Complete trip"}
+                  </Button>
+                )}
               </>
             ) : (
               <Button secondary onClick={() => receipt(b)}>

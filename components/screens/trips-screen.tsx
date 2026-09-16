@@ -5,7 +5,6 @@ import EmptyTripsPanel from "@/components/panels/empty-trips-panel";
 import PastTripsPanel from "@/components/panels/past-trips-panel";
 import TripPanel from "@/components/panels/trip-panel";
 import Header from "@/components/ui/header";
-import { vehicles } from "@/lib/data";
 
 export default function TripsScreen() {
   const { bookings, tab, setTab } = useObbian();
@@ -44,12 +43,9 @@ export default function TripsScreen() {
               (b) =>
                 b.status === (tab === "Upcoming" ? "Confirmed" : tab),
             )
-            .map((b) => {
-              const v = vehicles.find((v) => v.id === b.vehicleId)!;
-              return (
-                <TripPanel key={b.id} b={b} v={v} />
-              );
-            })}
+            .map((b) => (
+              <TripPanel key={b.id} b={b} />
+            ))}
           {!bookings.some(
             (b) => b.status === (tab === "Upcoming" ? "Confirmed" : tab),
           ) && (

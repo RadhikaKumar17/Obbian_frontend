@@ -5,36 +5,27 @@ import Button from "@/components/ui/button";
 import Chip from "@/components/ui/chip";
 import Input from "@/components/ui/input";
 import Panel from "@/components/ui/panel";
-import { policies } from "@/lib/data";
+import { useEffect, useRef } from "react";
 
 export default function PolicyChatPanel() {
-  const { router, setFaq, question, setQuestion, messages, asking, chatEnd, ask } = useObbian();
+  const { question, setQuestion, messages, asking, chatEnd, ask } = useObbian();
+  const seeded = useRef(false);
+  useEffect(() => {
+    if (seeded.current || messages.length) return;
+    seeded.current = true;
+    ask("What happens if I cancel tomorrow’s booking?");
+  }, [messages.length, ask]);
   return (
     <Panel>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-semibold">✦ Obbian Policy AI</h2>
-        <Chip>Demo knowledge base</Chip>
+        <Chip>Policy knowledge base</Chip>
       </div>
       <div
         className="mt-6 max-h-[390px] space-y-6 overflow-y-auto pr-1"
         role="log"
         aria-label="Policy conversation"
       >
-        <div className="ml-5 rounded-2xl bg-tint p-[18px] sm:ml-24">
-          What happens if I cancel tomorrow’s booking?
-        </div>
-        <div className="rounded-2xl bg-wash p-[18px]">
-          <p className="leading-7">{policies[0].answer}</p>
-          <button
-            onClick={() => {
-              setFaq("cancellation");
-              router.push("/support");
-            }}
-            className="chip mt-6 text-left"
-          >
-            [1] Cancellation Policy · Demo reference
-          </button>
-        </div>
         {messages.map((m, i) => (
           <div key={i} className="space-y-4">
             <div className="ml-5 rounded-2xl bg-tint p-[18px] sm:ml-24">

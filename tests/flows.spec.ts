@@ -11,9 +11,9 @@ test('search, booking, persistence, modification and cancellation',async({page})
  await page.getByRole('button',{name:'Confirm reservation'}).click();
  await expect(page.getByRole('heading',{name:'Reservation confirmed',exact:true})).toBeVisible();
  await page.getByRole('link',{name:'View My Trips'}).click();
- await expect(page.getByRole('tab',{name:'Upcoming 2'})).toBeVisible();
+ await expect(page.getByRole('tab',{name:'Upcoming 1'})).toBeVisible();
  await page.reload();
- await expect(page.getByRole('tab',{name:'Upcoming 2'})).toBeVisible();
+ await expect(page.getByRole('tab',{name:'Upcoming 1'})).toBeVisible();
  await page.getByRole('button',{name:'Manage booking'}).first().click();
  await page.getByLabel('New pickup date').fill('2028-12-20');
  await page.getByRole('button',{name:'Save changes'}).click();
@@ -32,7 +32,16 @@ test('filters, saved vehicles, policy and help interactions',async({page})=>{
  await page.getByRole('option', {name: 'Under ₹2,000/day'}).click();
  await page.getByRole('link',{name:'Search vehicles →'}).click();
  await expect(page.getByRole('heading',{name:'No rides found'})).toBeVisible();
+ await page.getByRole('link',{name:'← Edit search'}).click();
+ await page.getByRole('combobox', {name: 'Daily budget'}).click();
+ await page.getByRole('option', {name: 'Under ₹3,000/day'}).click();
+ await page.getByRole('link',{name:'Search vehicles →'}).click();
+ await page.getByRole('button',{name:'Save Hyundai Creta'}).click();
  await page.getByRole('link',{name:'Saved',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Saved vehicles'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Hyundai Creta'})).toBeVisible();
+ await page.reload();
+ await expect(page.getByRole('heading',{name:'Saved vehicles'})).toBeVisible();
  await expect(page.getByRole('heading',{name:'Hyundai Creta'})).toBeVisible();
  await page.getByRole('button',{name:'Remove',exact:true}).first().click();
  await expect(page.getByRole('heading',{name:'Hyundai Creta'})).toHaveCount(0);
@@ -64,12 +73,20 @@ test('all screens render without horizontal overflow or runtime errors',async({p
  await page.goto('/');await expect(page.locator('h1')).toBeVisible();
  await page.screenshot({path:`test-results/${test.info().project.name}-discover.png`,fullPage:true});
 });
-test('tracking can be paused and resumed',async({page})=>{
- await page.goto('/tracking');
- await page.getByRole('button',{name:'Pause tracking'}).click();
- await expect(page.getByText('● PAUSED')).toBeVisible();
- await page.getByRole('button',{name:'Resume tracking'}).click();
- await expect(page.getByText('● LIVE · Updating now')).toBeVisible();
+test('tracking reflects live backend status for the active booking',async({page})=>{
+ await page.goto('/');
+ await page.getByRole('link',{name:'Search vehicles →'}).click();
+ await page.getByRole('button',{name:'View details',exact:true}).click();
+ await page.getByRole('link',{name:'Reserve vehicle →'}).click();
+ await page.getByLabel('Mobile number').fill('9876543210');
+ await page.getByLabel('Driving licence').fill('DL-DEMO-123456');
+ await page.getByRole('checkbox').check();
+ await page.getByRole('button',{name:'Confirm reservation'}).click();
+ await page.getByRole('link',{name:'Track vehicle live →'}).click();
+ await expect(page.getByText('Driver en route').first()).toBeVisible();
+ await page.getByRole('link',{name:'My Trips',exact:true}).click();
+ await page.getByRole('button',{name:'Manage booking'}).first().click();
+ await page.getByRole('button',{name:'Cancel reservation'}).click();
 });
 test('selected vehicle and support handoff survive navigation',async({page})=>{
  await page.goto('/search');
@@ -83,8 +100,37 @@ test('selected vehicle and support handoff survive navigation',async({page})=>{
  await expect(page.getByRole('dialog')).toBeVisible();
  await page.getByLabel('Email', {exact:true}).fill('demo@example.com');
  await page.getByLabel('How can we help?').fill('Please help me change my pickup location.');
- await page.getByRole('button',{name:'Submit demo request'}).click();
- await expect(page.getByRole('status')).toContainText('no message was sent');
+ await page.getByRole('button',{name:'Submit request'}).click();
+ await expect(page.getByRole('status')).toContainText('Support request submitted');
+});
+test('geospatial map shows nearby vehicles and supports picking a search location', async ({page}) => {
+ await page.goto('/');
+ await expect(page.locator('.leaflet-container')).toBeVisible();
+ await expect(page.getByText(/\d+ nearby/)).toBeVisible();
+ const locateButton = page.getByRole('button', {name: /Use my location/});
+ await expect(locateButton).toBeVisible();
+ await page.locator('.leaflet-container').click({position: {x: 60, y: 60}});
+ await expect(page.getByRole('button', {name: 'Using your location'})).toBeVisible();
+ await expect(page.getByText('Tap the map to search a different spot')).toBeVisible();
+});
+test('an active trip can be completed by the renter and moves to the Completed tab', async ({page}) => {
+ test.setTimeout(60000);
+ await page.goto('/');
+ await page.getByRole('link',{name:'Search vehicles →'}).click();
+ await page.getByRole('button',{name:'View details',exact:true}).click();
+ await page.getByRole('link',{name:'Reserve vehicle →'}).click();
+ await page.getByLabel('Mobile number').fill('9876543210');
+ await page.getByLabel('Driving licence').fill('DL-DEMO-123456');
+ await page.getByRole('checkbox').check();
+ await page.getByRole('button',{name:'Confirm reservation'}).click();
+ await page.getByRole('link',{name:'Track vehicle live →'}).click();
+ await expect(page.getByText('Driver en route').first()).toBeVisible();
+ await expect(page.getByText('Vehicle arrived').first()).toBeVisible({timeout: 40000});
+ await expect(page.getByRole('button', {name: 'Complete trip'})).toBeVisible({timeout: 10000});
+ await page.getByRole('button', {name: 'Complete trip'}).click();
+ await expect(page.getByRole('tab', {name: 'Upcoming 0'})).toBeVisible();
+ await page.getByRole('tab', {name: 'Completed 1'}).click();
+ await expect(page.getByRole('button', {name: 'Download receipt'})).toBeVisible();
 });
 test('custom dropdown supports keyboard, dismissal, sorting and form values', async ({page}) => {
  await page.goto('/');
@@ -116,9 +162,6 @@ test('custom dropdown supports keyboard, dismissal, sorting and form values', as
  await expect(page.locator('section h2').first()).toHaveText('Tata Nexon');
  await page.goto('/checkout');
  const payment = page.getByRole('combobox', {name: 'Payment method'});
- await payment.click();
- await page.getByRole('option', {name: 'Demo UPI'}).click();
- await expect(payment).toContainText('Demo UPI');
- await expect(payment).toHaveAttribute('aria-expanded', 'false');
- expect(await page.locator('form').evaluate(form => new FormData(form as HTMLFormElement).get('payment'))).toBe('upi');
+ await expect(payment).toContainText('Pay at pickup');
+ expect(await page.locator('form').evaluate(form => new FormData(form as HTMLFormElement).get('paymentMethod'))).toBe('pickup');
 });

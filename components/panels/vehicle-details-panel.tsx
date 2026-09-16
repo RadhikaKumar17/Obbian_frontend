@@ -6,17 +6,18 @@ import Panel from "@/components/ui/panel";
 
 export default function VehicleDetailsPanel() {
   const { saved, car, toggleSave } = useObbian();
+  if (!car) return null;
   return (
     <Panel>
       <CarVisual large />
       <p className="mt-7 text-[15px]">
-        Automatic · SUV · 5 seats · Petrol
+        {car.transmission} · {car.category} · {car.seats} seats · {car.fuel}
       </p>
       <p className="mt-5">
-        ★ {car.rating} · 320+ trips · {car.distance} km away ·{" "}
+        ★ {car.rating} · {car.trips}+ trips · {car.distance} km away ·{" "}
         {car.available ? "Available" : "Currently unavailable"}
       </p>
-      <p className="mt-5">Pickup: Connaught Place, New Delhi</p>
+      <p className="mt-5">Pickup: {car.pickup}</p>
       <button
         className="mt-5 text-brand"
         onClick={() => toggleSave(car.id)}

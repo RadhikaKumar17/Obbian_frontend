@@ -5,28 +5,42 @@ import { useObbian } from "@/components/obbian-provider";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import Textarea from "@/components/ui/textarea";
+import { useCreateTicket } from "@/hooks/use-support";
 
 export default function ContactSupportDialog() {
-  const { setToast, contact, setContact } = useObbian();
+  const { setToast, contact, setContact, booking } = useObbian();
+  const createTicket = useCreateTicket();
   if (!contact) return null;
   return (
     <Modal title="Contact Obbian support" onClose={() => setContact(false)}>
       <p className="muted mb-5">
-        Leave a demo support request about your booking. This preview does
-        not send messages or provide emergency assistance.
+        Leave a support request about your booking. Our team responds by
+        email — this is not for emergency roadside assistance.
       </p>
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          setContact(false);
-          setToast(
-            "Demo request recorded for this session — no message was sent.",
+          const data = new FormData(e.currentTarget);
+          createTicket.mutate(
+            {
+              email: String(data.get("email") || "").trim(),
+              message: String(data.get("message") || "").trim(),
+              bookingId: booking?.id ?? null,
+            },
+            {
+              onSuccess: () => {
+                setContact(false);
+                setToast("Support request submitted");
+              },
+              onError: (error) => setToast(error instanceof Error ? error.message : "Something went wrong."),
+            },
           );
         }}
       >
         <label className="block">
           Email
           <Input
+            name="email"
             type="email"
             required
             className="mb-4 mt-2"
@@ -36,6 +50,7 @@ export default function ContactSupportDialog() {
         <label className="block">
           How can we help?
           <Textarea
+            name="message"
             required
             minLength={10}
             rows={4}
@@ -43,7 +58,7 @@ export default function ContactSupportDialog() {
             placeholder="Tell us about your booking or question…"
           />
         </label>
-        <Button type="submit">Submit demo request</Button>
+        <Button type="submit" disabled={createTicket.isPending}>Submit request</Button>
       </form>
     </Modal>
   );

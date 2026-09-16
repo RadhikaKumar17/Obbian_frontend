@@ -15,9 +15,8 @@ export default function PolicyEvidencePanel() {
       </p>
       <p className="muted mb-5 mt-9">Retrieved sources</p>
       {[
-        messages.at(-1)?.source || "Cancellation Policy v1.4",
+        messages.at(-1)?.source || "No policy matched yet",
         booking ? `Booking ${booking.id}` : "No booking selected",
-        "Refund Processing Guide",
       ].map((s, i) => (
         <div
           key={i}
@@ -27,8 +26,7 @@ export default function PolicyEvidencePanel() {
         </div>
       ))}
       <p className="muted mt-6">
-        This assistant searches a local demo policy library. It does
-        not connect to a live AI service.
+        This assistant retrieves answers from the Obbian policy library.
       </p>
       <div className="mt-auto pt-10">
         <button
