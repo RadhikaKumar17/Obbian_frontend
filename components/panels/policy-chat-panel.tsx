@@ -5,16 +5,10 @@ import Button from "@/components/ui/button";
 import Chip from "@/components/ui/chip";
 import Input from "@/components/ui/input";
 import Panel from "@/components/ui/panel";
-import { useEffect, useRef } from "react";
+import PolicyCitations from "@/components/ui/policy-citations";
 
 export default function PolicyChatPanel() {
   const { question, setQuestion, messages, asking, chatEnd, ask } = useObbian();
-  const seeded = useRef(false);
-  useEffect(() => {
-    if (seeded.current || messages.length) return;
-    seeded.current = true;
-    ask("What happens if I cancel tomorrow’s booking?");
-  }, [messages.length, ask]);
   return (
     <Panel>
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -32,13 +26,13 @@ export default function PolicyChatPanel() {
               {m.question}
             </div>
             <div className="rounded-2xl bg-wash p-[18px]">
-              <p className="leading-7">{m.answer}</p>
-              {m.source && (
-                <p className="chip mt-5">[1] {m.source}</p>
-              )}
+              <p className="whitespace-pre-line leading-7">{m.answer}</p>
+              <PolicyCitations citations={m.citations} />
             </div>
           </div>
         ))}
+        {!messages.length && <p className="text-sm text-muted">Ask a question below. Answers include the policy passages used as evidence.</p>}
+        {asking && <p role="status" className="text-sm text-brand">Checking the policy library…</p>}
         <div ref={chatEnd} />
       </div>
       <form
@@ -57,7 +51,7 @@ export default function PolicyChatPanel() {
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="Ask about insurance, deposit, fuel or late return…"
           className="field mt-3"
-          maxLength={500}
+          maxLength={2000}
           required
         />
         <div className="mt-3 flex justify-end">
@@ -76,6 +70,7 @@ export default function PolicyChatPanel() {
           <button
             key={q}
             className="chip w-fit text-left hover:bg-blue-100"
+            disabled={asking}
             onClick={() => ask(q)}
           >
             {q}

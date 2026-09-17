@@ -1,5 +1,6 @@
 "use client";
 
+import { useAssistant } from "@/hooks/use-assistant";
 import { useConfig } from "@/hooks/use-config";
 import { downloadReceipt, useBookings, useCreateBooking, useUpdateBooking } from "@/hooks/use-bookings";
 import { useGeolocation } from "@/hooks/use-geolocation";
@@ -8,7 +9,7 @@ import { useAskPolicy } from "@/hooks/use-policies";
 import { useSaved, useToggleSave } from "@/hooks/use-saved";
 import { useTracking } from "@/hooks/use-tracking";
 import { useSearch, useVehicles, type GeoPoint } from "@/hooks/use-vehicles";
-import type { Booking, Vehicle } from "@/lib/types";
+import type { Booking, Vehicle, RagAnswer, AssistantReply, AssistantAction } from "@/lib/types";
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 
@@ -63,6 +64,7 @@ function useObbianState() {
   const createBooking = useCreateBooking();
   const updateBooking = useUpdateBooking();
 
+  const [hasSelectedVehicle, setHasSelectedVehicle] = useState(false);
   const [vehicleId, setVehicleId] = useState("creta");
   const [selectedBooking, setSelectedBooking] = useState("");
   useEffect(() => {
@@ -91,7 +93,7 @@ function useObbianState() {
   const [faq, setFaq] = useState("");
   const [contact, setContact] = useState(false);
   const [question, setQuestion] = useState("");
-  const [messages, setMessages] = useState<{ question: string; answer: string; source?: string }[]>([]);
+  const [messages, setMessages] = useState<({ question: string } & RagAnswer)[]>([]);
   const askPolicy = useAskPolicy();
   const chatEnd = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -105,9 +107,42 @@ function useObbianState() {
   const tracking = useTracking(booking?.id ?? "", config?.trackingPollMs ?? 10000).data ?? null;
   useLiveTracking(booking?.id ?? "");
 
+  const assistant = useAssistant();
+  const [assistantMessages, setAssistantMessages] = useState<({ question: string } & AssistantReply)[]>([]);
+  const [assistantError, setAssistantError] = useState("");
+
+  function askAssistant(message: string) {
+    if (!message.trim() || assistant.isPending) return;
+    setAssistantError("");
+    const history = assistantMessages.flatMap(m => [
+      { role: 'user' as const, content: m.question.slice(0, 600) },
+      { role: 'assistant' as const, content: m.answer.slice(0, 600) },
+    ]).slice(-6);
+    assistant.mutate({ message, history, context: { date, budget, radius, category, transmission,
+      lat: origin?.lat, lng: origin?.lng, vehicleId: hasSelectedVehicle ? vehicleId : undefined, bookingId: booking?.id } }, {
+      onSuccess: response => {
+        setAssistantMessages(previous => [...previous, { question: message, ...response }]);
+        if (response.filters) {
+          setDate(response.filters.date); setBudget(response.filters.budget); setRadius(response.filters.radius);
+          setCategory(response.filters.category); setTransmission(response.filters.transmission);
+        }
+      },
+      onError: error => setAssistantError(errorMessage(error)),
+    });
+  }
+
+  function followAssistantAction(action: AssistantAction) {
+    if (action.date) setDate(action.date);
+    if (action.vehicleId) { setVehicleId(action.vehicleId); setHasSelectedVehicle(true); }
+    if (action.bookingId) setSelectedBooking(action.bookingId);
+    const routes = { search: '/search', vehicle: '/vehicle', checkout: '/checkout', trips: '/trips', tracking: '/tracking' };
+    router.push(routes[action.type]);
+  }
+
   const ready = Boolean(config) && vehiclesQuery.isSuccess && savedQuery.isSuccess && bookingsQuery.isSuccess && Boolean(date);
 
   function select(v: Vehicle) {
+    setHasSelectedVehicle(true);
     setVehicleId(v.id);
     router.push("/vehicle");
   }
@@ -178,17 +213,8 @@ function useObbianState() {
     if (!q.trim() || askPolicy.isPending) return;
     setQuestion("");
     askPolicy.mutate(q, {
-      onSuccess: (policy) => {
-        setMessages((m) => [
-          ...m,
-          {
-            question: q,
-            answer:
-              policy?.answer ||
-              "I don’t have a matching answer in the policy library. Please contact support for help with this question.",
-            source: policy?.source,
-          },
-        ]);
+      onSuccess: (response) => {
+        setMessages((m) => [...m, { question: q, ...response }]);
       },
       onError: (error) => setToast(errorMessage(error)),
     });
@@ -196,6 +222,7 @@ function useObbianState() {
 
   return {
     path, router, ready,
+    assistantMessages, assistantError, askingAssistant: assistant.isPending, askAssistant, followAssistantAction,
     config, vehicles,
     saved, bookings, vehicleId, setVehicleId, selectedBooking, setSelectedBooking,
     date, setDate, radius, setRadius, budget, setBudget, sort, setSort, category, setCategory, transmission, setTransmission,
