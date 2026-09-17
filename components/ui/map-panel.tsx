@@ -64,8 +64,32 @@ export default function MapPanel({ tracking = false, info = null, pickup = null,
         markers.current.set(vehicle.id, marker);
       }
       const button = document.createElement('button');
-      button.className = 'rounded-full border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 shadow-md hover:bg-blue-50';
-      button.textContent = `${money(vehicle.price)}/day`;
+      button.type = 'button';
+      button.className = 'flex items-center gap-2 rounded-2xl border border-blue-200 bg-white py-2 pl-2 pr-3 text-left shadow-md transition hover:border-blue-400 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-blue-600';
+      const thumbnail = document.createElement('span');
+      thumbnail.className = 'flex h-11 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-blue-50 text-3xl';
+      thumbnail.setAttribute('aria-hidden', 'true');
+      thumbnail.textContent = '🚙';
+      if (vehicle.imageUrl) {
+        const image = document.createElement('img');
+        image.src = vehicle.imageUrl;
+        image.alt = '';
+        image.width = 56;
+        image.height = 44;
+        image.className = 'h-full w-full object-contain';
+        image.onerror = () => { thumbnail.textContent = '🚙'; };
+        thumbnail.replaceChildren(image);
+      }
+      const label = document.createElement('span');
+      label.className = 'flex flex-col gap-0.5';
+      const name = document.createElement('span');
+      name.className = 'max-w-36 truncate text-xs font-medium text-slate-600';
+      name.textContent = vehicle.name;
+      const price = document.createElement('span');
+      price.className = 'whitespace-nowrap text-sm font-bold text-blue-700';
+      price.textContent = `${money(vehicle.price)}/day`;
+      label.append(name, price);
+      button.append(thumbnail, label);
       button.setAttribute('aria-label', `${vehicle.name}, ${money(vehicle.price)} per day, ${vehicle.distance} km away`);
       button.onclick = () => callbacks.current.onVehicleSelect?.(vehicle);
       marker.content = button;

@@ -1,4 +1,5 @@
 export type Vehicle = {
+  imageUrl?: string;
   id: string;
   name: string;
   price: number;
