@@ -8,7 +8,7 @@ import Header from "@/components/ui/header";
 import MapPanel from "@/components/ui/map-panel";
 
 export default function DiscoverScreen() {
-  const { results, origin, radius, setUserLocation } = useObbian();
+  const { results, origin, radius, setUserLocation, select } = useObbian();
   return (
     <>
       <Header
@@ -18,7 +18,7 @@ export default function DiscoverScreen() {
       <SearchFiltersPanel />
       <div className="grid gap-5 lg:grid-cols-[1.74fr_1fr]">
         <AiAssistantPanel />
-        <MapPanel vehicles={results} origin={origin} radiusKm={Number(radius)} onOriginChange={setUserLocation} />
+        <MapPanel vehicles={results} origin={origin} radiusKm={Number(radius)} onOriginChange={setUserLocation} onVehicleSelect={select} />
       </div>
       <div className="mt-8">
         <Go href="/policy" secondary>

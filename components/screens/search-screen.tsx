@@ -5,10 +5,11 @@ import EmptySearchPanel from "@/components/panels/empty-search-panel";
 import VehicleCard from "@/components/panels/vehicle-card";
 import Dropdown from "@/components/ui/dropdown";
 import Header from "@/components/ui/header";
+import MapPanel from "@/components/ui/map-panel";
 import Link from "next/link";
 
 export default function SearchScreen() {
-  const { sort, setSort, results, config } = useObbian();
+  const { sort, setSort, results, config, origin, radius, setUserLocation, select } = useObbian();
   return (
     <>
       <Header
@@ -28,6 +29,7 @@ export default function SearchScreen() {
           options={config?.sortOptions ?? []}
         />
       </div>
+      <div className="mb-6"><MapPanel vehicles={results} origin={origin} radiusKm={Number(radius)} onOriginChange={setUserLocation} onVehicleSelect={select} /></div>
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {results.map((v) => (
           <VehicleCard key={v.id} v={v} />

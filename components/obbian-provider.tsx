@@ -31,6 +31,8 @@ function useObbianState() {
     setDateState(value || config?.defaultDate || "");
   }
 
+  const [category, setCategory] = useState("SUV");
+  const [transmission, setTransmission] = useState("Automatic");
   const [radius, setRadius] = useState("10");
   const [budget, setBudget] = useState("3000");
   const [sort, setSort] = useState("recommended");
@@ -48,7 +50,7 @@ function useObbianState() {
 
   const vehiclesQuery = useVehicles(date, origin);
   const vehicles = vehiclesQuery.data ?? [];
-  const searchQuery = useSearch({ date, budget, radius, sort, origin });
+  const searchQuery = useSearch({ date, budget, radius, sort, category, transmission, origin });
   const results = searchQuery.data?.results ?? [];
   const recommendedId = searchQuery.data?.recommendedId ?? null;
 
@@ -196,7 +198,7 @@ function useObbianState() {
     path, router, ready,
     config, vehicles,
     saved, bookings, vehicleId, setVehicleId, selectedBooking, setSelectedBooking,
-    date, setDate, radius, setRadius, budget, setBudget, sort, setSort,
+    date, setDate, radius, setRadius, budget, setBudget, sort, setSort, category, setCategory, transmission, setTransmission,
     toast, setToast, tab, setTab, manage, setManage, newDate, setNewDate,
     tracking,
     userLocation, setUserLocation, origin, locateMe, locating: geolocation.loading,

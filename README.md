@@ -30,7 +30,7 @@ For browser tests, run `MONGODB_URI=... yarn test:e2e` (the backend requires a M
 | `/vehicle` | Selected vehicle details |
 | `/checkout` | Checkout with driver details and payment method |
 | `/confirmation` | Booking confirmation |
-| `/tracking` | Live pickup status on a Leaflet/OpenStreetMap map, streamed over WebSocket |
+| `/tracking` | Live pickup status on a Google map, streamed over WebSocket |
 | `/policy` | Policy assistant and retrieved sources |
 | `/trips` | Trips, date changes, cancellation and receipt downloads |
 | `/saved` | Saved vehicles |
@@ -45,7 +45,7 @@ Checkout collects real driver details (name, mobile, licence) and a payment meth
 ### Geospatial search and live GPS tracking
 
 - Vehicle search takes a GPS origin (`lat`/`lng`) and computes real haversine distance server-side; the radius filter and "nearest first" sort are genuine geospatial queries, not a static per-vehicle number.
-- The Discover map (`components/ui/map-panel.tsx`) is a real Leaflet + OpenStreetMap map (free, no API key): it plots nearby vehicles, draws the search radius as a circle, supports "Use my location" via the browser Geolocation API, and lets you click anywhere on the map to search from that point instead.
+- The Discover map (`components/ui/map-panel.tsx`) is a Google Maps map (requires a browser API key): it plots nearby vehicles, draws the search radius as a circle, supports "Use my location" via the browser Geolocation API, and lets you click anywhere on the map to search from that point instead.
 - Once a booking is confirmed, the backend (`OBBIAN_BACKEND/src/tracking-simulator.js`) simulates a driver's GPS position moving toward the pickup point and pushes live updates over a WebSocket (`/ws/tracking`, via the `ws` package) to any subscribed client — the tracking screen's map and ETA update in real time. A REST poll (`GET /api/bookings/:id/tracking`) is kept as an automatic fallback for clients without WebSocket support. Movement is paced to arrive in ~30 seconds for a good demo, while the displayed ETA is computed from a realistic city driving speed.
 - On arrival the booking auto-transitions `Confirmed → Active`. The renter can then self-complete the trip (`Active → Completed`) from the tracking screen or the trips list — this is what marks a trip "completed" for a demo, no admin action needed.
 
@@ -92,3 +92,39 @@ This backend needs a host that keeps long-lived WebSocket connections open (for 
 - **Render** ([render.com](https://render.com)) or **Fly.io** ([fly.io](https://fly.io)) are solid alternatives with the same requirements: set `MONGODB_URI`, `FRONTEND_ORIGINS`, and start with `node src/server.js`.
 
 Once deployed, point the frontend at it by setting `NEXT_PUBLIC_API_URL` to the deployed backend's `https://` URL (and `COOKIE_SECURE=true`, `COOKIE_SAME_SITE=None` on the backend if the frontend and backend end up on different domains — same-site `Lax` cookies only work when frontend and backend share a hostname, as they do in local dev).
+
+## Google Maps setup
+
+1. Open https://console.cloud.google.com/google/maps-apis/overview and select or create a project. Enable billing and **Maps JavaScript API**.
+2. Create a browser API key. Apply **Websites** restrictions for `https://obbian-frontend.netlify.app/*`, `http://localhost:3000/*`, and `http://localhost:3100/*` if running Playwright. Restrict the key to Maps JavaScript API.
+3. Under Google Maps Platform → Map Management, create a **JavaScript vector map ID**. `DEMO_MAP_ID` works for initial testing.
+4. Set these values in your local `.env` and Netlify's production environment variables (available to builds):
+
+   ```env
+   NEXT_PUBLIC_API_URL=https://obbianbackend-production.up.railway.app
+   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_browser_key
+   NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID=your_map_id
+   ```
+
+5. Restart the local dev server or rebuild and redeploy Netlify. These values are embedded at build time. Never add a server API secret to a `NEXT_PUBLIC_` variable.
+
+The browser key is public by design; domain/API restrictions protect its use. Map loads are billed by Google; configure quotas and budget alerts in Cloud Console. Places and Routes APIs are not required for this implementation.
+
+Discover and search results use Google Maps with price pins, click-to-select vehicles, a radius circle, click-to-search, and a Search this area button. Tracking retains a single map and vehicle marker, animates received positions, supports reduced motion, and offers a follow toggle. Dragging stops automatic following. WebSocket connections reconnect with backoff; HTTP polling remains the fallback. A delayed-update label appears after 15 seconds without a fresh GPS timestamp. Without a key, the map shows an unavailable state while the vehicle list remains usable.
+
+The backend companion changes add category/transmission filtering and precise distance-in-metres radius comparisons. Search still uses the existing in-memory Haversine calculation backed by the MongoDB state document, not a migrated `2dsphere` vehicle collection. Bookings retain the existing single-date rental model. Compare-and-swap revisions protect writes across server processes; cached search reads may lag another instance, so reservation creation always rechecks fresh database state. The existing simulator remains synthetic and does not use road routing. No LLM, RAG, or Python service is added.
+
+After configuring the key, verify: GPS permission accepted/denied; click-to-search; radius/type/transmission filtering; a price pin opens the correct vehicle; reserve; tracking animates; dragging disables follow; and socket reconnection after toggling browser offline mode. A Maps authorization error usually means the API, billing, or website restriction needs updating.
+
+Official setup: https://developers.google.com/maps/documentation/javascript/get-api-key
+
+Validation commands (backend expected in sibling `../OBBIAN_BACKEND`):
+
+```sh
+yarn typecheck
+yarn build
+node tests/backend-search.mjs
+node tests/backend-concurrency.mjs
+```
+
+The backend tests use seed data and an in-memory MongoDB test double; they do not connect to or mutate your deployed database. Live Google Maps and browser tracking still need manual verification with an enabled API key and running backend.

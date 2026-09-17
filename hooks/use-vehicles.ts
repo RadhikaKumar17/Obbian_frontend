@@ -22,11 +22,11 @@ export function useVehicles(date: string, origin?: GeoPoint | null) {
   });
 }
 
-export function useSearch(params: { date: string; budget: string; radius: string; sort: string; origin?: GeoPoint | null }) {
-  const { date, budget, radius, sort, origin } = params;
+export function useSearch(params: { date: string; budget: string; radius: string; sort: string; category: string; transmission: string; origin?: GeoPoint | null }) {
+  const { date, budget, radius, sort, category, transmission, origin } = params;
   return useQuery({
-    queryKey: ["search", date, budget, radius, sort, origin?.lat, origin?.lng],
-    queryFn: () => api.get<SearchResult>(`/api/search?${withOrigin({ date, budget, radius, sort }, origin)}`),
+    queryKey: ["search", date, budget, radius, sort, category, transmission, origin?.lat, origin?.lng],
+    queryFn: () => api.get<SearchResult>(`/api/search?${withOrigin({ date, budget, radius, sort, category, transmission }, origin)}`),
     enabled: Boolean(date),
     placeholderData: keepPreviousData,
   });

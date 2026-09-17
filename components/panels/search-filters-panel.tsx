@@ -1,14 +1,13 @@
 "use client";
 
 import { useObbian } from "@/components/obbian-provider";
-import Chip from "@/components/ui/chip";
 import Dropdown from "@/components/ui/dropdown";
 import Input from "@/components/ui/input";
 import Panel from "@/components/ui/panel";
 import { localDate, tomorrow } from "@/lib/data";
 
 export default function SearchFiltersPanel() {
-  const { date, setDate, radius, setRadius, budget, setBudget, config, userLocation, locateMe, locating } = useObbian();
+  const { vehicles, category, setCategory, transmission, setTransmission, date, setDate, radius, setRadius, budget, setBudget, config, userLocation, locateMe, locating } = useObbian();
   return (
     <Panel className="mb-[22px] !py-3">
       <div className="flex flex-wrap items-center gap-x-7 gap-y-3">
@@ -36,8 +35,8 @@ export default function SearchFiltersPanel() {
         </button>
       </div>
       <div className="mt-3 flex flex-wrap gap-5 sm:gap-20">
-        <Chip>SUV</Chip>
-        <Chip>Automatic</Chip>
+        <Dropdown aria-label="Vehicle type" value={category} onChange={setCategory} className="chip" options={[{value: "", label: "All vehicle types"}, ...Array.from(new Set(["SUV", ...vehicles.map(v => v.category)])).map(value => ({value, label: value}))]} />
+        <Dropdown aria-label="Transmission" value={transmission} onChange={setTransmission} className="chip" options={[{value: "", label: "All transmissions"}, ...Array.from(new Set(["Automatic", ...vehicles.map(v => v.transmission)])).map(value => ({value, label: value}))]} />
         <Dropdown
           aria-label="Daily budget"
           value={budget}
