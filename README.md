@@ -1,17 +1,15 @@
 # Obbian frontend
 
-A responsive Next.js App Router + TypeScript + Tailwind CSS implementation of the ten screens in the Obbian Figma prototype. Data and business logic live in the `OBBIAN_BACKEND` Node.js API; the frontend talks to it exclusively through TanStack Query. Uses Yarn Classic and locally bundled Inter fonts.
+Next.js (App Router) + TypeScript + Tailwind frontend for Obbian, a vehicle rental app. All data and business logic live in the `OBBIAN_BACKEND` API and the `OBBIAN_RAG` service; this app talks to them over HTTP/WebSocket via TanStack Query.
 
 ## Run
 
-Start the backend first (see `OBBIAN_BACKEND/README` section below), then:
-
 ```sh
 yarn install
-yarn dev
+yarn dev        # http://localhost:3000
 ```
 
-Open http://localhost:3000. Requires Node.js 20.9 or newer. The frontend reads the API base URL from `NEXT_PUBLIC_API_URL` (defaults to `http://localhost:4000`).
+Requires Node.js 20.9+, and the backend running (see `OBBIAN_BACKEND`).
 
 ```sh
 yarn typecheck
@@ -19,7 +17,17 @@ yarn build
 yarn start
 ```
 
-For browser tests, run `MONGODB_URI=... yarn test:e2e` (the backend requires a MongoDB connection — see Backend below). Playwright starts an isolated backend (port 4000) and production frontend (port 3100) and covers desktop and mobile. Before the first browser test run, install Chromium with `yarn playwright install chromium`.
+## Environment
+
+Set in `.env`:
+
+```env
+NEXT_PUBLIC_API_URL=https://obbianbackend-production.up.railway.app
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_browser_key
+NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID=your_map_id
+```
+
+The Google Maps key is a public, domain-restricted browser key by design.
 
 ## Screens
 
@@ -30,111 +38,21 @@ For browser tests, run `MONGODB_URI=... yarn test:e2e` (the backend requires a M
 | `/vehicle` | Selected vehicle details |
 | `/checkout` | Checkout with driver details and payment method |
 | `/confirmation` | Booking confirmation |
-| `/tracking` | Live pickup status on a Google map, streamed over WebSocket |
-| `/policy` | Policy assistant and retrieved sources |
-| `/trips` | Trips, date changes, cancellation and receipt downloads |
+| `/tracking` | Live vehicle location on a Google map, streamed over WebSocket |
+| `/policy` | Policy chat (RAG-backed) |
+| `/trips` | Trips, date changes, cancellation, receipts |
 | `/saved` | Saved vehicles |
-| `/support` | Searchable FAQs and support ticket form |
+| `/support` | FAQs and support tickets |
 
-Vehicles, availability, bookings, saved vehicles, support tickets and policy answers are all served by the backend and scoped to an httpOnly session cookie. Nothing is persisted in `localStorage`.
+Also on `/`: the **AI Assistant** panel — a tool-calling agent that can search vehicles, quote a price, list trips, track a vehicle, or answer a policy question from one chat box.
 
-## Scope
+## Structure
 
-Checkout collects real driver details (name, mobile, licence) and a payment method; payment is collected at pickup, no card is charged. Policy answers come from a keyword-matched retrieval step (the RAG logic) served by the backend's policy library, not a live LLM — intentionally untouched. Support tickets are stored by the backend, not transmitted externally.
-
-### Geospatial search and live GPS tracking
-
-- Vehicle search takes a GPS origin (`lat`/`lng`) and computes real haversine distance server-side; the radius filter and "nearest first" sort are genuine geospatial queries, not a static per-vehicle number.
-- The Discover map (`components/ui/map-panel.tsx`) is a Google Maps map (requires a browser API key): it plots nearby vehicles, draws the search radius as a circle, supports "Use my location" via the browser Geolocation API, and lets you click anywhere on the map to search from that point instead.
-- Once a booking is confirmed, the backend (`OBBIAN_BACKEND/src/tracking-simulator.js`) simulates a driver's GPS position moving toward the pickup point and pushes live updates over a WebSocket (`/ws/tracking`, via the `ws` package) to any subscribed client — the tracking screen's map and ETA update in real time. A REST poll (`GET /api/bookings/:id/tracking`) is kept as an automatic fallback for clients without WebSocket support. Movement is paced to arrive in ~30 seconds for a good demo, while the displayed ETA is computed from a realistic city driving speed.
-- On arrival the booking auto-transitions `Confirmed → Active`. The renter can then self-complete the trip (`Active → Completed`) from the tracking screen or the trips list — this is what marks a trip "completed" for a demo, no admin action needed.
-
-## Component structure
-
-- `components/obbian.tsx`: small app shell that selects a screen and mounts dialogs.
-- `components/obbian-provider.tsx`: composes the TanStack Query hooks into shared UI state and booking actions.
-- `components/query-provider.tsx`: the app's `QueryClientProvider`.
-- `components/screens/`: one file for each of the ten screens.
-- `components/panels/`: separate files for search filters, rental summary, driver details, policy chat, evidence, trips, and other panels.
-- `components/dialogs/`: individual booking-management and contact dialogs.
-- `components/ui/`: reusable dropdown, input, textarea, buttons, panel, chip, header, car visual and map.
-- `hooks/`: TanStack Query hooks (`use-config`, `use-vehicles`, `use-saved`, `use-bookings`, `use-tracking`, `use-live-tracking`, `use-geolocation`, `use-policies`, `use-support`) — the only place that talks to `lib/api.ts` or the tracking WebSocket.
-- `lib/api.ts`: fetch client for the backend, with cookies included for session auth.
-- `lib/types.ts`: shared API types (`Vehicle`, `Booking`, `Config`, `Tracking`, `Policy`).
-
-`Dropdown` accepts `options`, a controlled `value`/`onChange` pair or `defaultValue`, and an accessible `aria-label`. A `name` adds a hidden form field. It supports arrow keys, Home/End, type-ahead, Enter/Space, Escape, and outside-click dismissal. `Input` and `Textarea` accept native attributes and refs, preserving browser form validation.
+- `components/obbian-provider.tsx` — shared state, TanStack Query hooks, booking/chat actions
+- `components/screens/`, `components/panels/`, `components/dialogs/`, `components/ui/`
+- `hooks/` — the only layer that calls `lib/api.ts` or the tracking WebSocket
+- `lib/api.ts`, `lib/types.ts` — API client and shared types
 
 ## Backend
 
-`OBBIAN_BACKEND` is a standalone Node.js HTTP API (see `OBBIAN_BACKEND/src/server.js`), with `mongodb` and `ws` as its only dependencies. It is self-contained and can be moved out of this folder at any time — nothing in the frontend imports it directly, they only communicate over HTTP/WebSocket.
-
-All data (vehicles, bookings, saved lists, sessions, tickets, tracking, policies) lives in MongoDB, not a local file — required so the data survives redeploys on hosts with ephemeral disks. `OBBIAN_BACKEND/src/store.js` connects once and keeps the working set in memory for fast synchronous reads, committing every mutation back to Mongo atomically.
-
-```sh
-cd OBBIAN_BACKEND
-yarn install
-cp .env.example .env   # then set MONGODB_URI (see below)
-yarn dev                # http://127.0.0.1:4000
-```
-
-### Getting a MongoDB connection string
-
-Either works — paste the resulting connection string into `MONGODB_URI` in `.env`:
-
-- **Free MongoDB Atlas cluster**: [mongodb.com/cloud/atlas/register](https://www.mongodb.com/cloud/atlas/register) → create a free (M0) cluster → Database Access (create a user) → Network Access (allow `0.0.0.0/0` for simplicity, or your deploy host's IPs) → Connect → Drivers → copy the `mongodb+srv://...` string.
-- **Railway's MongoDB plugin**: in a Railway project, "New" → "Database" → "Add MongoDB" — it provisions a database and gives you a connection string in its Variables tab.
-
-### Deploying the backend
-
-This backend needs a host that keeps long-lived WebSocket connections open (for live GPS tracking) — that rules out pure serverless platforms like Vercel/Netlify Functions. Recommended:
-
-- **Railway** ([railway.app](https://railway.app)): connect the GitHub repo, set the root/start directory to `OBBIAN_BACKEND`, add the MongoDB plugin (above) or your own Atlas URI, set `FRONTEND_ORIGINS` to your deployed frontend's URL, and deploy. WebSockets and always-on services work out of the box.
-- **Render** ([render.com](https://render.com)) or **Fly.io** ([fly.io](https://fly.io)) are solid alternatives with the same requirements: set `MONGODB_URI`, `FRONTEND_ORIGINS`, and start with `node src/server.js`.
-
-Once deployed, point the frontend at it by setting `NEXT_PUBLIC_API_URL` to the deployed backend's `https://` URL (and `COOKIE_SECURE=true`, `COOKIE_SAME_SITE=None` on the backend if the frontend and backend end up on different domains — same-site `Lax` cookies only work when frontend and backend share a hostname, as they do in local dev).
-
-## Google Maps setup
-
-1. Open https://console.cloud.google.com/google/maps-apis/overview and select or create a project. Enable billing and **Maps JavaScript API**.
-2. Create a browser API key. Apply **Websites** restrictions for `https://obbian-frontend.netlify.app/*`, `http://localhost:3000/*`, and `http://localhost:3100/*` if running Playwright. Restrict the key to Maps JavaScript API.
-3. Under Google Maps Platform → Map Management, create a **JavaScript vector map ID**. `DEMO_MAP_ID` works for initial testing.
-4. Set these values in your local `.env` and Netlify's production environment variables (available to builds):
-
-   ```env
-   NEXT_PUBLIC_API_URL=https://obbianbackend-production.up.railway.app
-   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_browser_key
-   NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID=your_map_id
-   ```
-
-5. Restart the local dev server or rebuild and redeploy Netlify. These values are embedded at build time. Never add a server API secret to a `NEXT_PUBLIC_` variable.
-
-The browser key is public by design; domain/API restrictions protect its use. Map loads are billed by Google; configure quotas and budget alerts in Cloud Console. Places and Routes APIs are not required for this implementation.
-
-Discover and search results use Google Maps with price pins, click-to-select vehicles, a radius circle, click-to-search, and a Search this area button. Tracking retains a single map and vehicle marker, animates received positions, supports reduced motion, and offers a follow toggle. Dragging stops automatic following. WebSocket connections reconnect with backoff; HTTP polling remains the fallback. A delayed-update label appears after 15 seconds without a fresh GPS timestamp. Without a key, the map shows an unavailable state while the vehicle list remains usable.
-
-The backend companion changes add category/transmission filtering and precise distance-in-metres radius comparisons. Search still uses the existing in-memory Haversine calculation backed by the MongoDB state document, not a migrated `2dsphere` vehicle collection. Bookings retain the existing single-date rental model. Compare-and-swap revisions protect writes across server processes; cached search reads may lag another instance, so reservation creation always rechecks fresh database state. The existing simulator remains synthetic and does not use road routing. No LLM, RAG, or Python service is added.
-
-After configuring the key, verify: GPS permission accepted/denied; click-to-search; radius/type/transmission filtering; a price pin opens the correct vehicle; reserve; tracking animates; dragging disables follow; and socket reconnection after toggling browser offline mode. A Maps authorization error usually means the API, billing, or website restriction needs updating.
-
-Official setup: https://developers.google.com/maps/documentation/javascript/get-api-key
-
-Validation commands (backend expected in sibling `../OBBIAN_BACKEND`):
-
-```sh
-yarn typecheck
-yarn build
-node tests/backend-search.mjs
-node tests/backend-concurrency.mjs
-```
-
-The backend tests use seed data and an in-memory MongoDB test double; they do not connect to or mutate your deployed database. Live Google Maps and browser tracking still need manual verification with an enabled API key and running backend.
-
-## Demo login and logout
-
-The app now requires a demo login before loading trips, saved vehicles, or other app data. The login screen displays **demo@obbian.com** / **Obbian123!**, with a fill-credentials button and password visibility toggle. The sidebar shows the signed-in user and a logout button.
-
-Deploy the companion backend changes (`src/demo-auth.js`, `src/server.js`, `src/store.js`) to Railway before deploying this frontend to Netlify. No new environment variables are needed. Keep `FRONTEND_ORIGINS=https://obbian-frontend.netlify.app`, `COOKIE_SECURE=true`, and `COOKIE_SAME_SITE=None` on Railway. Browser cookie restrictions can affect cross-site Netlify/Railway sessions; the login screen detects when the session cookie was not retained.
-
-The backend validates the public demo credentials and issues a random HttpOnly session cookie. `/api/auth/me` restores the login after refresh; `/api/auth/logout` invalidates that session and clears the cookie. App APIs and tracking subscriptions require a valid session. Logging out clears the frontend query cache. A stable demo account identity retains trips and saved vehicles across logins, and the current browser's valid guest session data is migrated at first login. All users of these credentials share the account's data; this is a demonstration account, not individual customer authentication.
-
-Manual verification: try invalid credentials, fill the demo credentials, log in, open My Trips, refresh, log out, and open /trips again. Browser verification was not completed in this session.
+See `OBBIAN_BACKEND` for the API and `OBBIAN_RAG` for the policy RAG service. Chat history for both the Policy panel and the AI Assistant is persisted via Mem0, keyed per session.
