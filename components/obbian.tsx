@@ -13,10 +13,11 @@ import SupportScreen from "@/components/screens/support-screen";
 import TrackingScreen from "@/components/screens/tracking-screen";
 import TripsScreen from "@/components/screens/trips-screen";
 import VehicleScreen from "@/components/screens/vehicle-screen";
+import { DemoAuthProvider } from "@/components/demo-auth-provider";
 import Sidebar from "@/components/sidebar";
 
 export default function Obbian() {
-  return <ObbianProvider><ObbianContent /></ObbianProvider>;
+  return <DemoAuthProvider><ObbianProvider><ObbianContent /></ObbianProvider></DemoAuthProvider>;
 }
 
 function ObbianContent() {

@@ -14,6 +14,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
   });
+  if (res.status === 401 && !path.startsWith('/api/auth/') && typeof window !== 'undefined') window.dispatchEvent(new Event('obbian-session-expired'));
   if (res.status === 204) return undefined as T;
   const contentType = res.headers.get('content-type') || '';
   const body = contentType.includes('application/json') ? await res.json().catch(() => null) : await res.text();
