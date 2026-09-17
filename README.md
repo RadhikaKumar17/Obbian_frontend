@@ -128,3 +128,13 @@ node tests/backend-concurrency.mjs
 ```
 
 The backend tests use seed data and an in-memory MongoDB test double; they do not connect to or mutate your deployed database. Live Google Maps and browser tracking still need manual verification with an enabled API key and running backend.
+
+## Demo login and logout
+
+The app now requires a demo login before loading trips, saved vehicles, or other app data. The login screen displays **demo@obbian.com** / **Obbian123!**, with a fill-credentials button and password visibility toggle. The sidebar shows the signed-in user and a logout button.
+
+Deploy the companion backend changes (`src/demo-auth.js`, `src/server.js`, `src/store.js`) to Railway before deploying this frontend to Netlify. No new environment variables are needed. Keep `FRONTEND_ORIGINS=https://obbian-frontend.netlify.app`, `COOKIE_SECURE=true`, and `COOKIE_SAME_SITE=None` on Railway. Browser cookie restrictions can affect cross-site Netlify/Railway sessions; the login screen detects when the session cookie was not retained.
+
+The backend validates the public demo credentials and issues a random HttpOnly session cookie. `/api/auth/me` restores the login after refresh; `/api/auth/logout` invalidates that session and clears the cookie. App APIs and tracking subscriptions require a valid session. Logging out clears the frontend query cache. A stable demo account identity retains trips and saved vehicles across logins, and the current browser's valid guest session data is migrated at first login. All users of these credentials share the account's data; this is a demonstration account, not individual customer authentication.
+
+Manual verification: try invalid credentials, fill the demo credentials, log in, open My Trips, refresh, log out, and open /trips again. Browser verification was not completed in this session.
