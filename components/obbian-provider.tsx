@@ -1,11 +1,11 @@
 "use client";
 
-import { useAssistant } from "@/hooks/use-assistant";
+import { useAssistant, useAssistantChatHistory } from "@/hooks/use-assistant";
 import { useConfig } from "@/hooks/use-config";
 import { downloadReceipt, useBookings, useCreateBooking, useUpdateBooking } from "@/hooks/use-bookings";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useLiveTracking } from "@/hooks/use-live-tracking";
-import { useAskPolicy } from "@/hooks/use-policies";
+import { useAskPolicy, usePolicyChatHistory } from "@/hooks/use-policies";
 import { useSaved, useToggleSave } from "@/hooks/use-saved";
 import { useTracking } from "@/hooks/use-tracking";
 import { useSearch, useVehicles, type GeoPoint } from "@/hooks/use-vehicles";
@@ -95,6 +95,14 @@ function useObbianState() {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<({ question: string } & RagAnswer)[]>([]);
   const askPolicy = useAskPolicy();
+  const policyHistoryQuery = usePolicyChatHistory();
+  const [policyHistoryLoaded, setPolicyHistoryLoaded] = useState(false);
+  useEffect(() => {
+    if (!policyHistoryLoaded && policyHistoryQuery.data) {
+      setMessages(policyHistoryQuery.data);
+      setPolicyHistoryLoaded(true);
+    }
+  }, [policyHistoryQuery.data, policyHistoryLoaded]);
   const chatEnd = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (messages.length) chatEnd.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -110,6 +118,14 @@ function useObbianState() {
   const assistant = useAssistant();
   const [assistantMessages, setAssistantMessages] = useState<({ question: string } & AssistantReply)[]>([]);
   const [assistantError, setAssistantError] = useState("");
+  const assistantHistoryQuery = useAssistantChatHistory();
+  const [assistantHistoryLoaded, setAssistantHistoryLoaded] = useState(false);
+  useEffect(() => {
+    if (!assistantHistoryLoaded && assistantHistoryQuery.data) {
+      setAssistantMessages(assistantHistoryQuery.data);
+      setAssistantHistoryLoaded(true);
+    }
+  }, [assistantHistoryQuery.data, assistantHistoryLoaded]);
 
   function askAssistant(message: string) {
     if (!message.trim() || assistant.isPending) return;

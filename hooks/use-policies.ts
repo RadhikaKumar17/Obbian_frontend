@@ -16,3 +16,11 @@ export function useAskPolicy() {
       api.post<RagAnswer>("/api/policies/ask", { question }),
   });
 }
+
+export function usePolicyChatHistory() {
+  return useQuery({
+    queryKey: ["chats", "policy"],
+    queryFn: () => api.get<({ question: string } & RagAnswer)[]>("/api/chats/policy"),
+    staleTime: Infinity,
+  });
+}

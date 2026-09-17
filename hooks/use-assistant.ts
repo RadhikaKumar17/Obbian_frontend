@@ -8,6 +8,14 @@ export function useAssistant() {
   });
 }
 
+export function useAssistantChatHistory() {
+  return useQuery({
+    queryKey: ['chats', 'assistant'],
+    queryFn: () => api.get<({ question: string } & AssistantReply)[]>('/api/chats/assistant'),
+    staleTime: Infinity,
+  });
+}
+
 export function useRentalQuote(vehicleId: string, date: string) {
   return useQuery({
     queryKey: ['quote', vehicleId, date],
