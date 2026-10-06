@@ -192,14 +192,29 @@ export const AlertIcon = (p: IconProps) => (
   </Svg>
 );
 
-/** Obbian brand mark: a ring with a leaf-shaped notch. */
+export const UserIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="12" cy="8" r="3.5" />
+    <path d="M5 20c.6-3.6 3.4-6 7-6s6.4 2.4 7 6" />
+  </Svg>
+);
+export const HelpIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M9.7 9.5a2.4 2.4 0 1 1 3.5 2.1c-.8.5-1.2 1-1.2 1.9M12 16.5h.01" />
+  </Svg>
+);
+
+/** Obbian brand mark: the letter O in a ring. */
 export function LogoMark({ size = 36 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true" focusable="false">
-      <rect width="40" height="40" rx="11" fill="var(--color-brand)" />
-      <circle cx="20" cy="20" r="9" fill="none" stroke="#fff" strokeWidth="3.5" />
-      <path d="M20 26c0-5 3-8.5 8.5-9C28.5 22.5 25 26 20 26z" fill="var(--color-tint-strong)" />
-    </svg>
+    <span
+      aria-hidden="true"
+      style={{ width: size, height: size, fontSize: size * 0.44 }}
+      className="grid shrink-0 place-items-center rounded-full border-2 border-brand font-display font-bold leading-none text-brand"
+    >
+      O
+    </span>
   );
 }
 

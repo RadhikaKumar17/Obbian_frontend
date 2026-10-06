@@ -10,10 +10,11 @@ export default function SavedScreen() {
   return (
     <>
       <Header
-        title="Saved vehicles"
-        subtitle="Compare favourites and continue booking"
+        eyebrow="Saved"
+        title="Rides you love"
+        subtitle="Saved cars stay here until you book."
       />
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {vehicles
           .filter((v) => saved.includes(v.id))
           .map((v) => (

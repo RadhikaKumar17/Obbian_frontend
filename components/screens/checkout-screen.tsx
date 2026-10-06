@@ -10,12 +10,13 @@ export default function CheckoutScreen() {
   return (
     <>
       <Header
-        title="Confirm and pay"
-        subtitle="Complete the reservation securely"
+        eyebrow="Step 2 of 3"
+        title="Checkout"
+        subtitle="Almost there — confirm who's driving and how you'll pay."
       />
       <form
         onSubmit={reserve}
-        className="grid items-start gap-6 lg:grid-cols-[1.36fr_1fr]"
+        className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]"
       >
         <DriverDetailsPanel />
         <OrderSummaryPanel />

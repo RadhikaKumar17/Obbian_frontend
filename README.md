@@ -57,9 +57,15 @@ Also on `/`: the **AI Assistant** panel — a tool-calling agent that can search
 
 See `OBBIAN_BACKEND` for the API and `OBBIAN_RAG` for the policy RAG service. Chat history for both the Policy panel and the AI Assistant is persisted via Mem0, keyed per session.
 
-## Photo credits
+## Design
 
-Vehicle photos are free-licence stock images, loaded from the source sites:
+The UI follows the "Obbian UI Refresh" design: DM Sans and Space Grotesk, a green palette and rounded surfaces. All tokens live in `app/globals.css`.
+
+## Vehicle photos
+
+Cards show a studio shot per body style from `public/vehicles/` (`car-suv.jpg`, `car-hatch.jpg`, `car-sedan.jpg`). If one is missing, the card falls back to a scene photo of the model, then to an illustration. See `lib/vehicle-images.ts`.
+
+Fallback scene photos are free-licence stock images loaded from the source sites:
 
 - Hyundai Creta — [Zoshua Colah on Unsplash](https://unsplash.com/photos/a-red-hyundai-creta-is-parked-on-a-street-b3YsdjBe-Zw)
 - Kia Seltos — [Hyundai Motor Group on Unsplash](https://unsplash.com/photos/MTZ_S1XoJVQ)

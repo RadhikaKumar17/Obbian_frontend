@@ -8,10 +8,11 @@ export default function PolicyScreen() {
   return (
     <>
       <Header
-        title="Rental policy assistant"
+        eyebrow="Policy assistant"
+        title="Ask about our policies"
         subtitle="Answers from the Obbian demo policy library"
       />
-      <div className="grid gap-6 lg:grid-cols-[2.23fr_1fr]">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <PolicyChatPanel />
         <PolicyEvidencePanel />
       </div>

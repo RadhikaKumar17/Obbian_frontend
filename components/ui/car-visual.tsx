@@ -4,12 +4,16 @@ import type { VehiclePhoto } from "@/lib/vehicle-images";
 import { useId, useState } from "react";
 
 /**
- * Vehicle artwork. Shows the vehicle photo when one is available and falls
- * back to an illustration (also if the photo fails to load), so a card never
- * renders an empty frame.
+ * Vehicle artwork. Tries each photo in order and falls back to an illustration
+ * when none loads, so a card never renders an empty frame. The caller sets the
+ * frame size through `className`.
  */
-export default function CarVisual({ large = false, photo, name = "Rental vehicle", paint = "#eef0ee", category = "SUV" }: { large?: boolean; photo?: VehiclePhoto; name?: string; paint?: string; category?: string }) {
-  const [failed, setFailed] = useState(false);
+export default function CarVisual({ photos = [], name = "Rental vehicle", paint = "#eef0ee", category = "SUV", className = "aspect-[16/10]", eager = false }: { photos?: VehiclePhoto[]; name?: string; paint?: string; category?: string; className?: string; eager?: boolean }) {
+  const [state, setState] = useState({ key: "", index: 0 });
+  const key = photos.map((photo) => photo.src).join("|");
+  // Start again from the first photo whenever the vehicle changes.
+  const index = state.key === key ? state.index : 0;
+  const photo = photos[index];
   const clip = useId();
   const suv = !/sedan|hatch/i.test(category);
   // Roof height differs by body style; everything else is shared.
@@ -19,17 +23,16 @@ export default function CarVisual({ large = false, photo, name = "Rental vehicle
     ? `M58 58l13-19c2-3 5-4 8-4h105c5 0 9 2 12 5l22 18z`
     : `M70 58l22-11c3-2 6-2 9-2h78c5 0 9 2 12 5l26 8z`;
   return (
-    <div
-      className={`relative flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-wash to-tint ${large ? "h-64" : "h-[170px]"}`}
-    >
-      {photo && !failed ? (
+    <div className={`relative flex items-center justify-center overflow-hidden ${photo?.fit === "contain" ? "bg-white" : "bg-gradient-to-b from-wash to-tint"} ${className}`}>
+      {photo ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
+          key={photo.src}
           src={photo.src}
           alt={name}
-          loading="lazy"
-          onError={() => setFailed(true)}
-          className="h-full w-full object-cover"
+          loading={eager ? "eager" : "lazy"}
+          onError={() => setState({ key, index: index + 1 })}
+          className={`h-full w-full ${photo.fit === "contain" ? "object-contain" : "object-cover"}`}
           style={{ objectPosition: photo.focus, transform: photo.zoom ? `scale(${photo.zoom})` : undefined, transformOrigin: photo.focus }}
         />
       ) : (
@@ -37,7 +40,7 @@ export default function CarVisual({ large = false, photo, name = "Rental vehicle
           role="img"
           aria-label={name}
           viewBox="0 0 320 150"
-          className={large ? "w-[80%] max-w-[460px]" : "w-[86%] max-w-[300px]"}
+          className="h-[78%] max-w-[86%]"
         >
           <defs>
             <clipPath id={clip}><path d={body} /></clipPath>

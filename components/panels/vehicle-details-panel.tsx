@@ -1,58 +1,45 @@
 "use client";
 
 import { useObbian } from "@/components/obbian-provider";
-import CarVisual from "@/components/ui/car-visual";
 import Chip from "@/components/ui/chip";
-import { CarIcon, FuelIcon, GearboxIcon, HeartIcon, PinIcon, SeatsIcon, StarIcon } from "@/components/ui/icons";
-import Panel from "@/components/ui/panel";
-import { vehiclePaint, vehiclePhoto } from "@/lib/vehicle-images";
+import { CheckIcon } from "@/components/ui/icons";
+import Link from "next/link";
 
 export default function VehicleDetailsPanel() {
-  const { saved, car, toggleSave } = useObbian();
+  const { car, config } = useObbian();
   if (!car) return null;
-  const isSaved = saved.includes(car.id);
   return (
-    <Panel>
-      <CarVisual large photo={vehiclePhoto(car)} name={car.name} paint={vehiclePaint(car.id)} category={car.category} />
-      <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-        <Chip tone={car.available ? "success" : "neutral"}>{car.available ? "Available" : "Currently unavailable"}</Chip>
-        <span className="flex items-center gap-1.5">
-          <StarIcon size={15} className="text-amber-500" />
-          <span className="font-semibold">{car.rating}</span>
-          <span className="text-muted">· {car.trips}+ trips · {car.distance} km away</span>
-        </span>
-      </div>
-      <ul className="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4" aria-label="Vehicle features">
+    <div className="min-w-0">
+      <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {[
-          [GearboxIcon, "Transmission", car.transmission],
-          [CarIcon, "Category", car.category],
-          [SeatsIcon, "Seats", `${car.seats} seats`],
-          [FuelIcon, "Fuel", car.fuel],
-        ].map(([Icon, label, value]) => {
-          const FeatureIcon = Icon as typeof CarIcon;
-          return (
-            <li key={label as string} className="rounded-xl bg-wash p-3.5">
-              <FeatureIcon size={18} className="text-brand" />
-              <p className="muted mt-2 !text-xs">{label as string}</p>
-              <p className="font-medium">{value as string}</p>
-            </li>
-          );
-        })}
-      </ul>
-      <p className="mt-5 flex items-center gap-2.5 rounded-xl border border-line p-3.5 text-sm">
-        <PinIcon size={18} className="shrink-0 text-brand" />
-        <span>Pickup: {car.pickup}</span>
-      </p>
-      <button
-        className={`mt-5 inline-flex items-center gap-2 rounded-lg text-sm font-medium transition hover:text-brand-strong ${isSaved ? "text-brand" : "text-muted"}`}
-        aria-pressed={isSaved}
-        onClick={() => toggleSave(car.id)}
-      >
-        <HeartIcon size={18} filled={isSaved} />
-        {isSaved
-          ? "Saved to favourites"
-          : "Save vehicle"}
-      </button>
-    </Panel>
+          ["Transmission", car.transmission],
+          ["Seats", String(car.seats)],
+          ["Fuel", car.fuel],
+          ["Distance", `${car.distance} km`],
+        ].map(([label, value]) => (
+          <div key={label} className="panel !p-4">
+            <dt className="text-xs text-muted">{label}</dt>
+            <dd className="mt-1 truncate font-display text-lg font-semibold">{value}</dd>
+          </div>
+        ))}
+      </dl>
+      <section className="panel mt-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-semibold">Pickup</h2>
+          <Chip tone={car.available ? "success" : "neutral"}>{car.available ? "Available" : "Currently unavailable"}</Chip>
+        </div>
+        <p className="mt-1 text-base text-muted">
+          Pickup: {car.pickup}
+          {config ? ` · ${config.timeLabel}` : ""}
+        </p>
+        <h2 className="mt-6 text-xl font-semibold">Good to know</h2>
+        <ul className="mt-3 grid gap-2 text-sm text-muted sm:grid-cols-2">
+          <li className="flex items-center gap-2"><CheckIcon size={15} className="shrink-0 text-brand" /> {car.category} · {car.seats} seats</li>
+          <li className="flex items-center gap-2"><CheckIcon size={15} className="shrink-0 text-brand" /> {car.trips}+ trips completed</li>
+          <li className="flex items-center gap-2"><CheckIcon size={15} className="shrink-0 text-brand" /> Insurance added at checkout</li>
+          <li className="flex items-center gap-2"><CheckIcon size={15} className="shrink-0 text-brand" /> <Link href="/policy" className="link">Cancellation and fuel policy</Link></li>
+        </ul>
+      </section>
+    </div>
   );
 }

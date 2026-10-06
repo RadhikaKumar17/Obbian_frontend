@@ -77,7 +77,7 @@ export function DemoAuthProvider({ children }: { children: ReactNode }) {
             <li className="flex items-center gap-3"><span className="grid size-9 place-items-center rounded-lg bg-white/15"><PinIcon size={18} /></span>Live vehicle tracking to your pickup point</li>
           </ul>
         </div>
-        <p className="text-sm text-white/70">Rides for a better tomorrow</p>
+        <p className="text-sm text-white/70">Move smarter</p>
         <span className="pointer-events-none absolute -bottom-32 -right-24 size-96 rounded-full bg-white/5" />
         <span className="pointer-events-none absolute -right-10 top-24 size-56 rounded-full bg-white/5" />
       </aside>
@@ -87,7 +87,7 @@ export function DemoAuthProvider({ children }: { children: ReactNode }) {
             <LogoMark />
             <div>
               <p className="text-lg font-bold uppercase tracking-[.14em]">Obbian</p>
-              <p className="text-[11px] text-muted">Rides for a better tomorrow</p>
+              <p className="text-[11px] text-muted">Move smarter</p>
             </div>
           </div>
           <h1 id="login-title" className="mt-7 text-2xl font-bold tracking-[-.4px] lg:mt-0">Welcome to the demo</h1>

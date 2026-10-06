@@ -36,7 +36,7 @@ function ObbianContent() {
   return (
     <div className="min-h-screen">
       <Sidebar />
-      <main key={path} className="mx-auto min-h-screen max-w-[1800px] animate-fade-up px-4 py-6 sm:px-6 md:ml-[232px] md:px-9 md:py-8">
+      <div className="md:pl-56"><main key={path} className="mx-auto min-h-screen max-w-[1400px] animate-fade-up p-5 md:p-8">
         {path === "/" && <DiscoverScreen />}
         {path === "/search" && <SearchScreen />}
         {path === "/vehicle" && <VehicleScreen />}
@@ -47,7 +47,7 @@ function ObbianContent() {
         {path === "/trips" && <TripsScreen />}
         {path === "/saved" && <SavedScreen />}
         {path === "/support" && <SupportScreen />}
-      </main>
+      </main></div>
       {toast && (
         <div
           role="status"

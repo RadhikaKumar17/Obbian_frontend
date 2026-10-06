@@ -1,24 +1,28 @@
 @import "tailwindcss";
 
-/* Design tokens — the single place to change the Obbian palette. */
+/* Design tokens — the single place to change the Obbian palette and type. */
 @theme {
-  --color-brand: #1e5c43;
-  --color-brand-strong: #174935;
-  --color-accent: #2f8560;
-  --color-ink: #10231b;
-  --color-muted: #5d6e66;
-  --color-line: #e1eae5;
-  --color-wash: #f4f8f6;
-  --color-tint: #e5f2eb;
-  --color-tint-strong: #d3e9dd;
-  --color-success: #1f8a5b;
-  --color-danger: #b42318;
-  --color-danger-tint: #fdecea;
-  --color-warn: #8a5a00;
-  --color-warn-tint: #fdf3dc;
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --shadow-card: 0 1px 2px rgb(16 35 27 / 0.04), 0 8px 24px -12px rgb(16 35 27 / 0.10);
-  --shadow-lift: 0 2px 4px rgb(16 35 27 / 0.05), 0 18px 36px -16px rgb(16 35 27 / 0.18);
+  --color-page: oklch(0.985 0.004 150);
+  --color-brand: oklch(0.42 0.08 160);
+  --color-brand-strong: oklch(0.36 0.08 160);
+  --color-accent: oklch(0.5 0.1 158);
+  --color-ink: oklch(0.22 0.02 160);
+  --color-muted: oklch(0.52 0.02 160);
+  --color-line: oklch(0.92 0.01 155);
+  --color-wash: oklch(0.96 0.01 155);
+  --color-tint: oklch(0.93 0.035 155);
+  --color-tint-strong: oklch(0.89 0.045 155);
+  --color-success: oklch(0.52 0.12 155);
+  --color-danger: oklch(0.5 0.19 27);
+  --color-danger-tint: oklch(0.95 0.03 25);
+  --color-warn: oklch(0.48 0.1 75);
+  --color-warn-tint: oklch(0.95 0.05 90);
+  --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Space Grotesk', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --radius-surface: 1.4rem;
+  --shadow-card: 0 1px 2px oklch(0 0 0 / 4%), 0 8px 24px -16px oklch(0 0 0 / 12%);
+  --shadow-lift: 0 2px 4px oklch(0 0 0 / 5%), 0 18px 36px -18px oklch(0 0 0 / 20%);
+  --shadow-glow: 0 8px 24px -14px color-mix(in oklab, var(--color-brand) 60%, transparent);
   --animate-fade-up: fade-up 0.28s ease-out both;
   --animate-shimmer: shimmer 1.4s linear infinite;
   @keyframes fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
@@ -26,7 +30,8 @@
 }
 
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--color-wash); color: var(--color-ink); font-size: 14px; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+body { margin: 0; background: var(--color-page); color: var(--color-ink); font-family: var(--font-sans); font-size: 14px; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
 ::selection { background: var(--color-tint-strong); }
 button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 button, a { touch-action: manipulation; }
@@ -40,18 +45,25 @@ input[type="date"] { color-scheme: light; accent-color: var(--color-brand); }
 .scroll-soft { scrollbar-width: thin; scrollbar-color: var(--color-tint-strong) transparent; }
 
 @layer components {
-  .panel { @apply rounded-2xl border border-line bg-white p-[22px] shadow-card; }
-  .btn { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-strong active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 disabled:active:translate-y-0; }
-  .btn-secondary { @apply border border-line bg-white text-brand shadow-none hover:border-tint-strong hover:bg-tint; }
-  .btn-icon { @apply inline-grid size-11 shrink-0 place-items-center rounded-xl bg-brand text-white shadow-sm transition hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-50; }
-  .chip { @apply inline-flex items-center gap-1.5 rounded-full bg-tint px-3 py-1.5 text-xs font-medium text-brand; }
-  .pill { @apply inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-full border border-line bg-white px-4 py-1.5 text-[13px] font-medium text-ink transition hover:border-tint-strong hover:bg-tint; }
-  .pill-active { @apply border-brand bg-brand text-white hover:border-brand-strong hover:bg-brand-strong; }
-  .field { @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-sm text-ink transition placeholder:text-muted/70 hover:border-tint-strong focus:border-brand; }
+  /* Card surface */
+  .panel { @apply rounded-[var(--radius-surface)] border border-line bg-white p-6 shadow-card; }
+  /* Primary action */
+  .btn { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.9rem] bg-brand px-6 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-px hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0; }
+  /* Secondary action: outlined pill */
+  .btn-secondary { @apply rounded-full border border-line bg-transparent font-medium text-ink shadow-none hover:translate-y-0 hover:bg-wash; }
+  .btn-icon { @apply inline-grid size-12 shrink-0 place-items-center rounded-[0.9rem] bg-brand text-white shadow-glow transition hover:-translate-y-px hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-50; }
+  /* Small label: tags and statuses */
+  .chip { @apply inline-flex items-center gap-1.5 rounded-full bg-tint px-3 py-1 text-xs font-medium text-brand-strong; }
+  /* Filter / tab toggle */
+  .pill { @apply inline-flex min-h-8 items-center gap-1.5 whitespace-nowrap rounded-full bg-wash px-3.5 py-1.5 text-[13px] text-muted transition hover:bg-tint hover:text-brand-strong; }
+  .pill-active { @apply bg-brand text-white hover:bg-brand-strong hover:text-white; }
+  .field { @apply w-full rounded-xl border border-line bg-page px-4 py-3 text-sm text-ink transition placeholder:text-muted/70 focus:border-brand; }
   .muted { @apply text-[13px] leading-relaxed text-muted; }
+  .eyebrow { @apply text-xs font-semibold uppercase tracking-[0.2em] text-brand; }
   .link { @apply font-medium text-brand underline-offset-4 hover:underline; }
   .alert { @apply rounded-xl bg-danger-tint p-3 text-sm text-danger; }
   .icon-tile { @apply inline-grid size-11 shrink-0 place-items-center rounded-xl bg-tint text-brand; }
+  .stat { @apply rounded-xl border border-line px-3 py-2 text-xs; }
   .skeleton { @apply animate-shimmer rounded-xl bg-[linear-gradient(90deg,var(--color-tint)_25%,var(--color-wash)_50%,var(--color-tint)_75%)] bg-[length:200%_100%]; }
 }
 

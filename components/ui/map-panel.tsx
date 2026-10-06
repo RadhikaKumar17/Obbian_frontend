@@ -2,7 +2,7 @@
 
 import { money } from "@/lib/data";
 import { loadGoogleMaps } from "@/lib/google-maps";
-import { vehiclePhoto } from "@/lib/vehicle-images";
+import { vehiclePhotos } from "@/lib/vehicle-images";
 import type { Tracking, Vehicle } from "@/lib/types";
 import { useEffect, useRef, useState } from "react";
 
@@ -11,8 +11,8 @@ type LatLng = { lat: number; lng: number };
 const CAR_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11l1.6-4.2A2 2 0 0 1 8.5 5.5h7a2 2 0 0 1 1.9 1.3L19 11"/><rect x="3" y="11" width="18" height="6" rx="2"/><path d="M6 17v1.5M18 17v1.5M7 14h.01M17 14h.01"/></svg>';
 const valid = (point: LatLng) => Number.isFinite(point.lat) && Number.isFinite(point.lng) && Math.abs(point.lat) <= 90 && Math.abs(point.lng) <= 180;
 
-export default function MapPanel({ tracking = false, info = null, pickup = null, vehicles = [], origin = null, radiusKm = 10, onOriginChange, onVehicleSelect }: {
-  tracking?: boolean; info?: Tracking | null; pickup?: LatLng | null; vehicles?: Vehicle[];
+export default function MapPanel({ tracking = false, compact = false, tall = false, info = null, pickup = null, vehicles = [], origin = null, radiusKm = 10, onOriginChange, onVehicleSelect }: {
+  tracking?: boolean; compact?: boolean; tall?: boolean; info?: Tracking | null; pickup?: LatLng | null; vehicles?: Vehicle[];
   origin?: LatLng | null; radiusKm?: number; onOriginChange?: (coords: LatLng) => void;
   onVehicleSelect?: (vehicle: Vehicle) => void;
 }) {
@@ -70,17 +70,17 @@ export default function MapPanel({ tracking = false, info = null, pickup = null,
       button.type = 'button';
       button.className = 'flex items-center gap-2 rounded-2xl border border-line bg-white py-2 pl-2 pr-3 text-left shadow-md transition hover:border-brand hover:bg-wash focus-visible:outline-2 focus-visible:outline-brand';
       const thumbnail = document.createElement('span');
-      thumbnail.className = 'flex h-11 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-tint text-brand';
+      thumbnail.className = 'flex h-11 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white text-brand';
       thumbnail.setAttribute('aria-hidden', 'true');
       thumbnail.innerHTML = CAR_SVG;
-      const photo = vehiclePhoto(vehicle);
+      const photo = vehiclePhotos(vehicle)[0];
       if (photo) {
         const image = document.createElement('img');
         image.src = photo.src;
         image.alt = '';
         image.width = 56;
         image.height = 44;
-        image.className = 'h-full w-full object-cover';
+        image.className = 'h-full w-full object-contain';
         image.onerror = () => { thumbnail.innerHTML = CAR_SVG; };
         thumbnail.replaceChildren(image);
       }
@@ -147,9 +147,9 @@ export default function MapPanel({ tracking = false, info = null, pickup = null,
   useEffect(() => { if (!tracking) return; const timer = setInterval(() => setNow(Date.now()), 5000); return () => clearInterval(timer); }, [tracking]);
   const stale = !info?.updatedAt || now - Date.parse(info.updatedAt) > 15000;
   return (
-    <section aria-label={tracking ? 'Live vehicle tracking' : 'Nearby vehicles map'} className={`relative overflow-hidden rounded-2xl border border-line bg-white shadow-card ${tracking ? 'min-h-[450px] lg:min-h-[650px]' : 'min-h-[330px]'}`}>
+    <section aria-label={tracking ? 'Live vehicle tracking' : 'Nearby vehicles map'} className={`relative overflow-hidden border border-line bg-white ${compact ? 'min-h-44 rounded-2xl' : tracking || tall ? 'min-h-[420px] rounded-3xl lg:min-h-[520px]' : 'min-h-80 rounded-3xl'}`}>
       <div ref={container} className="absolute inset-0" />
-      {(!ready || error) && <div role="status" className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_1px_1px,var(--color-tint-strong)_1px,transparent_0)] bg-[length:22px_22px] bg-wash p-8 text-center text-sm text-muted">{error || 'Loading Google Maps…'}</div>}
+      {(!ready || error) && <div role="status" className="absolute inset-0 grid place-items-center bg-[linear-gradient(115deg,transparent_46%,#fff_46%,#fff_50%,transparent_50%),linear-gradient(25deg,transparent_60%,#fff_60%,#fff_63%,transparent_63%)] bg-tint p-6 text-center text-sm text-muted">{error || 'Loading Google Maps…'}</div>}
       {ready && !error && <>
         <p className="pointer-events-none absolute right-3 top-3 rounded-full bg-white/95 px-3 py-2 text-xs font-medium shadow-card">{tracking ? (stale ? 'Location update delayed' : info?.status || 'Live location') : `${vehicles.length} nearby`}</p>
         {tracking ? <button type="button" aria-pressed={follow} onClick={() => setFollow(!follow)} className="absolute left-3 top-3 rounded-full bg-white px-3.5 py-2 text-[13px] font-medium text-brand shadow-card transition hover:bg-tint">{follow ? 'Following vehicle' : 'Follow vehicle'}</button> : onOriginChange && <button type="button" onClick={() => { const center = map.current?.getCenter(); if (center) onOriginChange(center.toJSON()); }} className="absolute left-3 top-3 rounded-full bg-white px-3.5 py-2 text-[13px] font-medium text-brand shadow-card transition hover:bg-tint">Search this area</button>}

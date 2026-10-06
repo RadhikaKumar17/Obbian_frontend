@@ -1,8 +1,11 @@
 # Vehicle photos
 
-Vehicle photos are registered in `lib/vehicle-images.ts`. The defaults are
-loaded from free-licence stock sites; to use your own, put a file here
-(`creta.webp`, …) and point that vehicle's `src` at `/vehicles/<file>`.
+One studio shot per body style, taken from the Obbian design:
 
-- Side or front three-quarter view, about 960×540 (16:9), under 150 KB.
-- Use photos you have the right to publish.
+- `car-suv.jpg`
+- `car-hatch.jpg`
+- `car-sedan.jpg` (not added yet)
+
+The current files are small crops. Replace them with the full-size originals
+from the Lovable project (`src/assets/`) for sharper images; keep the names.
+The lookup lives in `lib/vehicle-images.ts`.
