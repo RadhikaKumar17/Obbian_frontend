@@ -6,6 +6,7 @@ import CarVisual from "@/components/ui/car-visual";
 import { FuelIcon, GearboxIcon, HeartIcon, SeatsIcon, SparkleIcon, StarIcon } from "@/components/ui/icons";
 import type { Vehicle } from "@/lib/data";
 import { dateLabel, money } from "@/lib/data";
+import { vehiclePaint, vehiclePhoto } from "@/lib/vehicle-images";
 
 export default function VehicleCard({ v, savedView = false }: { v: Vehicle; savedView?: boolean }) {
   const { saved, date, select, toggleSave, recommendedId } = useObbian();
@@ -14,7 +15,7 @@ export default function VehicleCard({ v, savedView = false }: { v: Vehicle; save
   return (
     <article className="panel group flex flex-col !p-4 transition duration-200 hover:-translate-y-0.5 hover:shadow-lift">
       <div className="relative">
-        <CarVisual src={v.imageUrl} name={v.name} />
+        <CarVisual src={vehiclePhoto(v)} name={v.name} paint={vehiclePaint(v.id)} category={v.category} />
         {recommended ? (
           <span className="chip absolute left-3 top-3 bg-white/95 shadow-sm"><SparkleIcon size={13} />AI recommended</span>
         ) : !v.available ? (

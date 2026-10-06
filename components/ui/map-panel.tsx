@@ -2,6 +2,7 @@
 
 import { money } from "@/lib/data";
 import { loadGoogleMaps } from "@/lib/google-maps";
+import { vehiclePhoto } from "@/lib/vehicle-images";
 import type { Tracking, Vehicle } from "@/lib/types";
 import { useEffect, useRef, useState } from "react";
 
@@ -72,13 +73,14 @@ export default function MapPanel({ tracking = false, info = null, pickup = null,
       thumbnail.className = 'flex h-11 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-tint text-brand';
       thumbnail.setAttribute('aria-hidden', 'true');
       thumbnail.innerHTML = CAR_SVG;
-      if (vehicle.imageUrl) {
+      const photo = vehiclePhoto(vehicle);
+      if (photo) {
         const image = document.createElement('img');
-        image.src = vehicle.imageUrl;
+        image.src = photo;
         image.alt = '';
         image.width = 56;
         image.height = 44;
-        image.className = 'h-full w-full object-contain';
+        image.className = 'h-full w-full object-cover';
         image.onerror = () => { thumbnail.innerHTML = CAR_SVG; };
         thumbnail.replaceChildren(image);
       }
