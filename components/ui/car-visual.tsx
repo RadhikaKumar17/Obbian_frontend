@@ -1,5 +1,6 @@
 "use client";
 
+import type { VehiclePhoto } from "@/lib/vehicle-images";
 import { useId, useState } from "react";
 
 /**
@@ -7,7 +8,7 @@ import { useId, useState } from "react";
  * back to an illustration (also if the photo fails to load), so a card never
  * renders an empty frame.
  */
-export default function CarVisual({ large = false, src, name = "Rental vehicle", paint = "#eef0ee", category = "SUV" }: { large?: boolean; src?: string; name?: string; paint?: string; category?: string }) {
+export default function CarVisual({ large = false, photo, name = "Rental vehicle", paint = "#eef0ee", category = "SUV" }: { large?: boolean; photo?: VehiclePhoto; name?: string; paint?: string; category?: string }) {
   const [failed, setFailed] = useState(false);
   const clip = useId();
   const suv = !/sedan|hatch/i.test(category);
@@ -21,9 +22,16 @@ export default function CarVisual({ large = false, src, name = "Rental vehicle",
     <div
       className={`relative flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-wash to-tint ${large ? "h-64" : "h-[170px]"}`}
     >
-      {src && !failed ? (
+      {photo && !failed ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt={name} loading="lazy" onError={() => setFailed(true)} className="h-full w-full object-cover" />
+        <img
+          src={photo.src}
+          alt={name}
+          loading="lazy"
+          onError={() => setFailed(true)}
+          className="h-full w-full object-cover"
+          style={{ objectPosition: photo.focus, transform: photo.zoom ? `scale(${photo.zoom})` : undefined, transformOrigin: photo.focus }}
+        />
       ) : (
         <svg
           role="img"

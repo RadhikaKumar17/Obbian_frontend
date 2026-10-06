@@ -13,7 +13,7 @@ export default function VehicleDetailsPanel() {
   const isSaved = saved.includes(car.id);
   return (
     <Panel>
-      <CarVisual large src={vehiclePhoto(car)} name={car.name} paint={vehiclePaint(car.id)} category={car.category} />
+      <CarVisual large photo={vehiclePhoto(car)} name={car.name} paint={vehiclePaint(car.id)} category={car.category} />
       <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
         <Chip tone={car.available ? "success" : "neutral"}>{car.available ? "Available" : "Currently unavailable"}</Chip>
         <span className="flex items-center gap-1.5">

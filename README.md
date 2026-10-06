@@ -56,3 +56,11 @@ Also on `/`: the **AI Assistant** panel — a tool-calling agent that can search
 ## Backend
 
 See `OBBIAN_BACKEND` for the API and `OBBIAN_RAG` for the policy RAG service. Chat history for both the Policy panel and the AI Assistant is persisted via Mem0, keyed per session.
+
+## Photo credits
+
+Vehicle photos are free-licence stock images, loaded from the source sites:
+
+- Hyundai Creta — [Zoshua Colah on Unsplash](https://unsplash.com/photos/a-red-hyundai-creta-is-parked-on-a-street-b3YsdjBe-Zw)
+- Kia Seltos — [Hyundai Motor Group on Unsplash](https://unsplash.com/photos/MTZ_S1XoJVQ)
+- Tata Nexon — [Yogendra Singh on Pexels](https://www.pexels.com/photo/car-parked-in-a-desert-area-23534116/)

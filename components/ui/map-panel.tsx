@@ -76,7 +76,7 @@ export default function MapPanel({ tracking = false, info = null, pickup = null,
       const photo = vehiclePhoto(vehicle);
       if (photo) {
         const image = document.createElement('img');
-        image.src = photo;
+        image.src = photo.src;
         image.alt = '';
         image.width = 56;
         image.height = 44;
