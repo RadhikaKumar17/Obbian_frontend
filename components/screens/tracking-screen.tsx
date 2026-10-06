@@ -13,7 +13,7 @@ export default function TrackingScreen() {
         title="Track your vehicle"
         subtitle="Follow your vehicle’s journey to the pickup location"
       />
-      <div className="grid gap-6 lg:grid-cols-[2.76fr_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[2.4fr_1fr]">
         <MapPanel tracking info={tracking} pickup={bookedCar ? { lat: bookedCar.lat, lng: bookedCar.lng } : null} />
         <ActiveTripPanel />
       </div>

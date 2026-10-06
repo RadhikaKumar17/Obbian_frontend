@@ -1,5 +1,6 @@
 "use client";
 
+import { CheckIcon, ChevronDownIcon } from "@/components/ui/icons";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 
 export type DropdownOption = { value: string; label: string };
@@ -80,11 +81,11 @@ export default function Dropdown({ options, value, defaultValue, onChange, name,
       {name && <input type="hidden" name={name} value={selectedValue} disabled={disabled} />}
       <button ref={triggerRef} id={id} type="button" role="combobox" aria-label={label} aria-haspopup="listbox" aria-expanded={open} aria-controls={listId} aria-activedescendant={open ? `${listId}-${activeIndex}` : undefined} disabled={disabled || !options.length} onKeyDown={handleKeyDown} onClick={() => { setActiveIndex(Math.max(selectedIndex, 0)); setOpen(!open); }} className={`flex min-h-10 w-full items-center justify-between gap-4 text-left disabled:cursor-not-allowed disabled:opacity-50 ${className || "field"}`}>
         <span>{options[selectedIndex]?.label || "Select an option"}</span>
-        <span aria-hidden="true" className={`text-brand transition-transform ${open ? "rotate-180" : ""}`}>⌄</span>
+        <ChevronDownIcon size={16} className={`shrink-0 text-brand transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
-      {open && <ul id={listId} role="listbox" aria-label={label} className={`absolute ${align === "end" ? "right-0" : "left-0"} top-full z-40 mt-2 max-h-64 w-max min-w-full max-w-[calc(100vw-3rem)] overflow-y-auto rounded-xl border border-line bg-white p-1.5 shadow-lg`}>
-        {options.map((option, index) => <li key={option.value} id={`${listId}-${index}`} role="option" aria-selected={selectedValue === option.value} onPointerMove={() => setActiveIndex(index)} onMouseDown={event => event.preventDefault()} onClick={() => choose(index)} className={`flex cursor-pointer items-center justify-between gap-5 rounded-lg px-3 py-3 text-sm ${activeIndex === index ? "bg-tint text-brand" : "text-ink"}`}>
-          <span>{option.label}</span><span aria-hidden="true" className="w-4 text-brand">{selectedValue === option.value ? "✓" : ""}</span>
+      {open && <ul id={listId} role="listbox" aria-label={label} className={`absolute ${align === "end" ? "right-0" : "left-0"} top-full z-40 mt-2 max-h-64 w-max min-w-full max-w-[calc(100vw-3rem)] overflow-y-auto animate-fade-up rounded-xl border border-line bg-white p-1.5 shadow-lift`}>
+        {options.map((option, index) => <li key={option.value} id={`${listId}-${index}`} role="option" aria-selected={selectedValue === option.value} onPointerMove={() => setActiveIndex(index)} onMouseDown={event => event.preventDefault()} onClick={() => choose(index)} className={`flex cursor-pointer items-center justify-between gap-5 rounded-lg px-3 py-2.5 text-sm font-normal ${activeIndex === index ? "bg-tint text-brand" : "text-ink"}`}>
+          <span>{option.label}</span><span aria-hidden="true" className="grid w-4 place-items-center text-brand">{selectedValue === option.value && <CheckIcon size={15} />}</span>
         </li>)}
       </ul>}
     </div>

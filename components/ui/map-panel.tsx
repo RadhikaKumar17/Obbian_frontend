@@ -6,6 +6,8 @@ import type { Tracking, Vehicle } from "@/lib/types";
 import { useEffect, useRef, useState } from "react";
 
 type LatLng = { lat: number; lng: number };
+// Static markup for map markers, which are built outside React.
+const CAR_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11l1.6-4.2A2 2 0 0 1 8.5 5.5h7a2 2 0 0 1 1.9 1.3L19 11"/><rect x="3" y="11" width="18" height="6" rx="2"/><path d="M6 17v1.5M18 17v1.5M7 14h.01M17 14h.01"/></svg>';
 const valid = (point: LatLng) => Number.isFinite(point.lat) && Number.isFinite(point.lng) && Math.abs(point.lat) <= 90 && Math.abs(point.lng) <= 180;
 
 export default function MapPanel({ tracking = false, info = null, pickup = null, vehicles = [], origin = null, radiusKm = 10, onOriginChange, onVehicleSelect }: {
@@ -65,11 +67,11 @@ export default function MapPanel({ tracking = false, info = null, pickup = null,
       }
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = 'flex items-center gap-2 rounded-2xl border border-blue-200 bg-white py-2 pl-2 pr-3 text-left shadow-md transition hover:border-blue-400 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-blue-600';
+      button.className = 'flex items-center gap-2 rounded-2xl border border-line bg-white py-2 pl-2 pr-3 text-left shadow-md transition hover:border-brand hover:bg-wash focus-visible:outline-2 focus-visible:outline-brand';
       const thumbnail = document.createElement('span');
-      thumbnail.className = 'flex h-11 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-blue-50 text-3xl';
+      thumbnail.className = 'flex h-11 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-tint text-brand';
       thumbnail.setAttribute('aria-hidden', 'true');
-      thumbnail.textContent = '🚙';
+      thumbnail.innerHTML = CAR_SVG;
       if (vehicle.imageUrl) {
         const image = document.createElement('img');
         image.src = vehicle.imageUrl;
@@ -77,16 +79,16 @@ export default function MapPanel({ tracking = false, info = null, pickup = null,
         image.width = 56;
         image.height = 44;
         image.className = 'h-full w-full object-contain';
-        image.onerror = () => { thumbnail.textContent = '🚙'; };
+        image.onerror = () => { thumbnail.innerHTML = CAR_SVG; };
         thumbnail.replaceChildren(image);
       }
       const label = document.createElement('span');
       label.className = 'flex flex-col gap-0.5';
       const name = document.createElement('span');
-      name.className = 'max-w-36 truncate text-xs font-medium text-slate-600';
+      name.className = 'max-w-36 truncate text-xs font-medium text-muted';
       name.textContent = vehicle.name;
       const price = document.createElement('span');
-      price.className = 'whitespace-nowrap text-sm font-bold text-blue-700';
+      price.className = 'whitespace-nowrap text-sm font-bold text-brand';
       price.textContent = `${money(vehicle.price)}/day`;
       label.append(name, price);
       button.append(thumbnail, label);
@@ -103,7 +105,7 @@ export default function MapPanel({ tracking = false, info = null, pickup = null,
   useEffect(() => {
     if (!ready || !map.current || tracking || !origin || !valid(origin)) return;
     const marker = new google.maps.marker.AdvancedMarkerElement({ map: map.current, position: origin, title: 'Search location' });
-    const circle = new google.maps.Circle({ map: map.current, center: origin, radius: Math.max(0, radiusKm) * 1000, strokeColor: '#2563eb', strokeWeight: 1, fillColor: '#2563eb', fillOpacity: 0.07, clickable: false });
+    const circle = new google.maps.Circle({ map: map.current, center: origin, radius: Math.max(0, radiusKm) * 1000, strokeColor: '#1e5c43', strokeWeight: 1, fillColor: '#1e5c43', fillOpacity: 0.07, clickable: false });
     map.current.panTo(origin);
     return () => { marker.map = null; circle.setMap(null); };
   }, [ready, tracking, origin?.lat, origin?.lng, radiusKm]);
@@ -121,7 +123,7 @@ export default function MapPanel({ tracking = false, info = null, pickup = null,
     if (!valid(target)) return;
     if (!driver.current) {
       const icon = document.createElement('div');
-      icon.textContent = '🚙'; icon.style.fontSize = '32px';
+      icon.className = 'grid size-11 place-items-center rounded-full border-2 border-white bg-brand text-white shadow-lg'; icon.innerHTML = CAR_SVG;
       driver.current = new google.maps.marker.AdvancedMarkerElement({ map: map.current, position: target, content: icon, title: 'Vehicle location' });
     }
     const start = position.current ?? target;
@@ -143,12 +145,12 @@ export default function MapPanel({ tracking = false, info = null, pickup = null,
   useEffect(() => { if (!tracking) return; const timer = setInterval(() => setNow(Date.now()), 5000); return () => clearInterval(timer); }, [tracking]);
   const stale = !info?.updatedAt || now - Date.parse(info.updatedAt) > 15000;
   return (
-    <section aria-label={tracking ? 'Live vehicle tracking' : 'Nearby vehicles map'} className={`relative overflow-hidden rounded-2xl border border-line ${tracking ? 'min-h-[450px] lg:min-h-[650px]' : 'min-h-[330px]'}`}>
+    <section aria-label={tracking ? 'Live vehicle tracking' : 'Nearby vehicles map'} className={`relative overflow-hidden rounded-2xl border border-line bg-white shadow-card ${tracking ? 'min-h-[450px] lg:min-h-[650px]' : 'min-h-[330px]'}`}>
       <div ref={container} className="absolute inset-0" />
-      {(!ready || error) && <div role="status" className="absolute inset-0 grid place-items-center bg-slate-50 p-8 text-center text-sm text-muted">{error || 'Loading Google Maps…'}</div>}
+      {(!ready || error) && <div role="status" className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_1px_1px,var(--color-tint-strong)_1px,transparent_0)] bg-[length:22px_22px] bg-wash p-8 text-center text-sm text-muted">{error || 'Loading Google Maps…'}</div>}
       {ready && !error && <>
-        <p className="pointer-events-none absolute right-3 top-3 rounded-full bg-white/95 px-3 py-2 text-xs shadow">{tracking ? (stale ? 'Location update delayed' : info?.status || 'Live location') : `${vehicles.length} nearby`}</p>
-        {tracking ? <button type="button" aria-pressed={follow} onClick={() => setFollow(!follow)} className="absolute left-3 top-3 rounded-full bg-white px-3 py-2 text-sm shadow">{follow ? 'Following vehicle' : 'Follow vehicle'}</button> : onOriginChange && <button type="button" onClick={() => { const center = map.current?.getCenter(); if (center) onOriginChange(center.toJSON()); }} className="absolute left-3 top-3 rounded-full bg-white px-3 py-2 text-sm shadow">Search this area</button>}
+        <p className="pointer-events-none absolute right-3 top-3 rounded-full bg-white/95 px-3 py-2 text-xs font-medium shadow-card">{tracking ? (stale ? 'Location update delayed' : info?.status || 'Live location') : `${vehicles.length} nearby`}</p>
+        {tracking ? <button type="button" aria-pressed={follow} onClick={() => setFollow(!follow)} className="absolute left-3 top-3 rounded-full bg-white px-3.5 py-2 text-[13px] font-medium text-brand shadow-card transition hover:bg-tint">{follow ? 'Following vehicle' : 'Follow vehicle'}</button> : onOriginChange && <button type="button" onClick={() => { const center = map.current?.getCenter(); if (center) onOriginChange(center.toJSON()); }} className="absolute left-3 top-3 rounded-full bg-white px-3.5 py-2 text-[13px] font-medium text-brand shadow-card transition hover:bg-tint">Search this area</button>}
       </>}
     </section>
   );

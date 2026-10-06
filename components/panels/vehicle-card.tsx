@@ -3,53 +3,61 @@
 import { useObbian } from "@/components/obbian-provider";
 import Button from "@/components/ui/button";
 import CarVisual from "@/components/ui/car-visual";
-import Chip from "@/components/ui/chip";
-import Panel from "@/components/ui/panel";
+import { FuelIcon, GearboxIcon, HeartIcon, SeatsIcon, SparkleIcon, StarIcon } from "@/components/ui/icons";
 import type { Vehicle } from "@/lib/data";
 import { dateLabel, money } from "@/lib/data";
 
 export default function VehicleCard({ v, savedView = false }: { v: Vehicle; savedView?: boolean }) {
   const { saved, date, select, toggleSave, recommendedId } = useObbian();
+  const isSaved = saved.includes(v.id);
+  const recommended = !savedView && v.id === recommendedId;
   return (
-    <Panel className="flex flex-col !p-[18px]">
-      <CarVisual />
-      <div className="mt-4 flex min-h-8 items-center justify-between">
-        {!savedView && v.id === recommendedId ? (
-          <Chip>AI recommended</Chip>
-        ) : (
-          <span />
-        )}
+    <article className="panel group flex flex-col !p-4 transition duration-200 hover:-translate-y-0.5 hover:shadow-lift">
+      <div className="relative">
+        <CarVisual src={v.imageUrl} name={v.name} />
+        {recommended ? (
+          <span className="chip absolute left-3 top-3 bg-white/95 shadow-sm"><SparkleIcon size={13} />AI recommended</span>
+        ) : !v.available ? (
+          <span className="chip absolute left-3 top-3 !bg-white/95 !text-muted shadow-sm">Unavailable</span>
+        ) : null}
         <button
           onClick={() => toggleSave(v.id)}
-          aria-label={`${saved.includes(v.id) ? "Unsave" : "Save"} ${v.name}`}
-          aria-pressed={saved.includes(v.id)}
-          className="rounded-lg px-2 py-1 text-xl text-brand"
+          aria-label={`${isSaved ? "Unsave" : "Save"} ${v.name}`}
+          aria-pressed={isSaved}
+          className={`absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-white/95 shadow-sm transition hover:scale-105 ${isSaved ? "text-brand" : "text-muted hover:text-brand"}`}
         >
-          {saved.includes(v.id) ? "♥" : "♡"}
+          <HeartIcon size={18} filled={isSaved} />
         </button>
       </div>
-      <h2 className="mt-4 text-[21px] font-semibold">{v.name}</h2>
-      <p className="muted mt-3">
-        {savedView
-          ? `★ ${v.rating} · Automatic SUV`
-          : `${v.distance} km · ★ ${v.rating}`}
-      </p>
-      {savedView ? (
-        <p className="muted mt-6">
-          {v.available
-            ? "Available " + dateLabel(date).toLowerCase()
-            : "Check future availability"}
-        </p>
-      ) : (
-        <div className="mt-5 flex gap-4">
-          <Chip>SUV</Chip>
-          <Chip>Automatic</Chip>
+      <div className="mt-4 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="truncate text-[17px] font-semibold leading-6">{v.name}</h2>
+          <p className="muted mt-0.5 truncate">
+            {savedView
+              ? v.available
+                ? "Available " + dateLabel(date).toLowerCase()
+                : "Check future availability"
+              : `${v.category} · ${v.distance} km away`}
+          </p>
         </div>
-      )}
-      <p className="my-5 text-right text-lg font-semibold">
-        {money(v.price)}/day
-      </p>
-      <div className="mt-auto flex flex-wrap gap-3">
+        <div className="shrink-0 text-right">
+          <p className="text-lg font-bold leading-6">
+            {money(v.price)}
+            <span className="text-xs font-normal text-muted">/day</span>
+          </p>
+          <p className="mt-0.5 flex items-center justify-end gap-1 text-xs text-muted">
+            <StarIcon size={13} className="text-amber-500" />
+            <span className="font-semibold text-ink">{v.rating}</span>
+            {v.trips ? <span>({v.trips})</span> : null}
+          </p>
+        </div>
+      </div>
+      <ul className="mt-4 grid grid-cols-3 gap-2 text-xs" aria-label="Vehicle features">
+        <li className="flex min-w-0 flex-col items-center gap-1 rounded-xl bg-wash px-1.5 py-2.5 text-center"><SeatsIcon size={16} className="shrink-0 text-brand" /><span className="w-full truncate">{v.seats} seats</span></li>
+        <li className="flex min-w-0 flex-col items-center gap-1 rounded-xl bg-wash px-1.5 py-2.5 text-center"><GearboxIcon size={16} className="shrink-0 text-brand" /><span className="w-full truncate">{v.transmission}</span></li>
+        <li className="flex min-w-0 flex-col items-center gap-1 rounded-xl bg-wash px-1.5 py-2.5 text-center"><FuelIcon size={16} className="shrink-0 text-brand" /><span className="w-full truncate">{v.fuel}</span></li>
+      </ul>
+      <div className="mt-auto flex flex-wrap gap-2.5 pt-4">
         <button className="btn flex-1" onClick={() => select(v)}>
           {savedView
             ? v.available
@@ -65,6 +73,6 @@ export default function VehicleCard({ v, savedView = false }: { v: Vehicle; save
           </Button>
         )}
       </div>
-    </Panel>
+    </article>
   );
 }

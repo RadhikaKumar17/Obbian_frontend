@@ -1,18 +1,13 @@
 "use client";
 
+import EmptyState from "@/components/ui/empty-state";
 import Go from "@/components/ui/go";
-import Panel from "@/components/ui/panel";
+import { HeartIcon } from "@/components/ui/icons";
 
 export default function EmptySavedPanel() {
   return (
-    <Panel>
-      <h2 className="text-lg font-semibold">
-        Your favourites are waiting
-      </h2>
-      <p className="muted my-4">
-        Save a vehicle from search results to compare it here.
-      </p>
-      <Go href="/search">Browse vehicles</Go>
-    </Panel>
+    <EmptyState icon={<HeartIcon size={22} />} title="Your favourites are waiting" action={<Go href="/search">Browse vehicles</Go>}>
+      Save a vehicle from search results to compare it here.
+    </EmptyState>
   );
 }

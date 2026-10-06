@@ -10,10 +10,11 @@ export default function DriverDetailsPanel() {
   const { config } = useObbian();
   return (
     <Panel>
-      <h2 className="mb-6 text-xl font-semibold">Driver details</h2>
+      <h2 className="text-xl font-semibold">Driver details</h2>
+      <p className="muted mb-6 mt-1">Use the name and licence of the person collecting the vehicle.</p>
       <div className="space-y-5">
         <label className="block">
-          <span className="muted">Full name</span>
+          <span className="text-[13px] font-medium">Full name</span>
           <Input
             required
             name="name"
@@ -25,7 +26,7 @@ export default function DriverDetailsPanel() {
           />
         </label>
         <label className="block">
-          <span className="muted">Mobile number</span>
+          <span className="text-[13px] font-medium">Mobile number</span>
           <Input
             required
             name="mobile"
@@ -37,7 +38,7 @@ export default function DriverDetailsPanel() {
           />
         </label>
         <label className="block">
-          <span className="muted">Driving licence</span>
+          <span className="text-[13px] font-medium">Driving licence</span>
           <Input
             required
             name="licence"
@@ -48,7 +49,7 @@ export default function DriverDetailsPanel() {
           />
         </label>
         <div>
-          <label htmlFor="payment-method" className="muted">Payment method</label>
+          <label htmlFor="payment-method" className="text-[13px] font-medium">Payment method</label>
           <Dropdown
             id="payment-method"
             aria-label="Payment method"
@@ -58,7 +59,7 @@ export default function DriverDetailsPanel() {
             options={config?.paymentMethods ?? []}
           />
         </div>
-        <label className="flex items-center gap-3">
+        <label className="flex items-center gap-3 rounded-xl bg-wash p-3.5">
           <Input
             type="checkbox"
             name="termsAccepted"
@@ -67,7 +68,7 @@ export default function DriverDetailsPanel() {
           />
           <span>
             I agree to the{" "}
-            <Link className="text-brand underline" href="/policy">
+            <Link className="link underline" href="/policy">
               rental terms
             </Link>
           </span>

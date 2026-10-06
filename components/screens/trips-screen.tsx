@@ -15,7 +15,7 @@ export default function TripsScreen() {
         subtitle="Manage upcoming, active and completed rentals"
       />
       <div
-        className="mb-6 flex flex-wrap gap-3"
+        className="mb-6 flex gap-2 overflow-x-auto py-1"
         role="tablist"
         aria-label="Trip status"
       >
@@ -25,18 +25,20 @@ export default function TripsScreen() {
             role="tab"
             aria-selected={tab === t}
             onClick={() => setTab(t)}
-            className={`chip ${tab === t ? "ring-1 ring-brand" : "!bg-white !text-muted"}`}
+            className={`pill ${tab === t ? "pill-active" : ""}`}
           >
             {t}{" "}
-            {
-              bookings.filter(
-                (b) => b.status === (t === "Upcoming" ? "Confirmed" : t),
-              ).length
-            }
+            <span className={`rounded-full px-1.5 text-[11px] font-semibold ${tab === t ? "bg-white/20" : "bg-wash text-muted"}`}>
+              {
+                bookings.filter(
+                  (b) => b.status === (t === "Upcoming" ? "Confirmed" : t),
+                ).length
+              }
+            </span>
           </button>
         ))}
       </div>
-      <div className="grid gap-6 lg:grid-cols-[2.05fr_1fr]">
+      <div className="grid items-start gap-6 lg:grid-cols-[2.05fr_1fr]">
         <div className="space-y-5">
           {bookings
             .filter(

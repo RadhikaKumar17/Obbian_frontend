@@ -1,18 +1,58 @@
 @import "tailwindcss";
-@theme { --color-brand: #055cf5; --color-ink: #081430; --color-muted: #61708c; --color-line: #d9e3f2; --color-wash: #f5faff; --color-tint: #e8f2ff; --color-success: #08a663; --font-sans: 'Inter', sans-serif; }
-body { margin: 0; background: #f5faff; color: #081430; font-size: 14px; }
+
+/* Design tokens — the single place to change the Obbian palette. */
+@theme {
+  --color-brand: #1e5c43;
+  --color-brand-strong: #174935;
+  --color-accent: #2f8560;
+  --color-ink: #10231b;
+  --color-muted: #5d6e66;
+  --color-line: #e1eae5;
+  --color-wash: #f4f8f6;
+  --color-tint: #e5f2eb;
+  --color-tint-strong: #d3e9dd;
+  --color-success: #1f8a5b;
+  --color-danger: #b42318;
+  --color-danger-tint: #fdecea;
+  --color-warn: #8a5a00;
+  --color-warn-tint: #fdf3dc;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --shadow-card: 0 1px 2px rgb(16 35 27 / 0.04), 0 8px 24px -12px rgb(16 35 27 / 0.10);
+  --shadow-lift: 0 2px 4px rgb(16 35 27 / 0.05), 0 18px 36px -16px rgb(16 35 27 / 0.18);
+  --animate-fade-up: fade-up 0.28s ease-out both;
+  --animate-shimmer: shimmer 1.4s linear infinite;
+  @keyframes fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+}
+
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--color-wash); color: var(--color-ink); font-size: 14px; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+::selection { background: var(--color-tint-strong); }
 button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 button, a { touch-action: manipulation; }
 button:not(:disabled), select { cursor: pointer; }
-button, a, input, select, textarea { outline-offset: 4px; }
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #055cf5; }
-input,select,textarea { min-width: 0; }
+button, a, input, select, textarea { outline-offset: 3px; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--color-brand); }
+input, select, textarea { min-width: 0; }
+input[type="date"] { color-scheme: light; accent-color: var(--color-brand); }
+
+/* Quiet scrollbars inside chat logs and lists. */
+.scroll-soft { scrollbar-width: thin; scrollbar-color: var(--color-tint-strong) transparent; }
+
 @layer components {
- .panel { @apply rounded-2xl border border-line bg-white p-[22px]; }
- .btn { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50; }
- .btn-secondary { @apply border border-line bg-white text-brand hover:bg-tint; }
- .chip { @apply inline-flex items-center rounded-full bg-tint px-3.5 py-2 text-xs font-medium text-brand; }
- .field { @apply w-full rounded-xl border border-line bg-wash px-4 py-3.5 text-sm; }
- .muted { @apply text-[13px] leading-relaxed text-muted; }
+  .panel { @apply rounded-2xl border border-line bg-white p-[22px] shadow-card; }
+  .btn { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-strong active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 disabled:active:translate-y-0; }
+  .btn-secondary { @apply border border-line bg-white text-brand shadow-none hover:border-tint-strong hover:bg-tint; }
+  .btn-icon { @apply inline-grid size-11 shrink-0 place-items-center rounded-xl bg-brand text-white shadow-sm transition hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-50; }
+  .chip { @apply inline-flex items-center gap-1.5 rounded-full bg-tint px-3 py-1.5 text-xs font-medium text-brand; }
+  .pill { @apply inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-full border border-line bg-white px-4 py-1.5 text-[13px] font-medium text-ink transition hover:border-tint-strong hover:bg-tint; }
+  .pill-active { @apply border-brand bg-brand text-white hover:border-brand-strong hover:bg-brand-strong; }
+  .field { @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-sm text-ink transition placeholder:text-muted/70 hover:border-tint-strong focus:border-brand; }
+  .muted { @apply text-[13px] leading-relaxed text-muted; }
+  .link { @apply font-medium text-brand underline-offset-4 hover:underline; }
+  .alert { @apply rounded-xl bg-danger-tint p-3 text-sm text-danger; }
+  .icon-tile { @apply inline-grid size-11 shrink-0 place-items-center rounded-xl bg-tint text-brand; }
+  .skeleton { @apply animate-shimmer rounded-xl bg-[linear-gradient(90deg,var(--color-tint)_25%,var(--color-wash)_50%,var(--color-tint)_75%)] bg-[length:200%_100%]; }
 }
+
 @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }

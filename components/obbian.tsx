@@ -15,6 +15,7 @@ import TripsScreen from "@/components/screens/trips-screen";
 import VehicleScreen from "@/components/screens/vehicle-screen";
 import { DemoAuthProvider } from "@/components/demo-auth-provider";
 import Sidebar from "@/components/sidebar";
+import { LogoMark, Spinner } from "@/components/ui/icons";
 
 export default function Obbian() {
   return <DemoAuthProvider><ObbianProvider><ObbianContent /></ObbianProvider></DemoAuthProvider>;
@@ -25,16 +26,17 @@ function ObbianContent() {
   if (!ready)
     return (
       <div
-        className="flex min-h-screen items-center justify-center text-brand"
+        className="flex min-h-screen flex-col items-center justify-center gap-4 text-sm font-medium text-brand"
         role="status"
       >
-        Loading Obbian…
+        <LogoMark size={48} />
+        <span className="flex items-center gap-2"><Spinner size={16} />Loading Obbian…</span>
       </div>
     );
   return (
     <div className="min-h-screen">
       <Sidebar />
-      <main className="mx-auto min-h-screen max-w-[1800px] px-5 py-7 md:ml-[220px] md:px-[34px]">
+      <main key={path} className="mx-auto min-h-screen max-w-[1800px] animate-fade-up px-4 py-6 sm:px-6 md:ml-[232px] md:px-9 md:py-8">
         {path === "/" && <DiscoverScreen />}
         {path === "/search" && <SearchScreen />}
         {path === "/vehicle" && <VehicleScreen />}
@@ -49,7 +51,7 @@ function ObbianContent() {
       {toast && (
         <div
           role="status"
-          className="fixed bottom-6 left-1/2 z-50 max-w-[90vw] -translate-x-1/2 rounded-xl bg-ink px-6 py-4 text-white shadow-xl"
+          className="fixed bottom-6 left-1/2 z-50 max-w-[90vw] -translate-x-1/2 animate-fade-up rounded-2xl bg-ink px-5 py-3.5 text-sm font-medium text-white shadow-lift"
         >
           {toast}
         </div>

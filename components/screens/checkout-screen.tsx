@@ -15,7 +15,7 @@ export default function CheckoutScreen() {
       />
       <form
         onSubmit={reserve}
-        className="grid gap-6 lg:grid-cols-[1.36fr_1fr]"
+        className="grid items-start gap-6 lg:grid-cols-[1.36fr_1fr]"
       >
         <DriverDetailsPanel />
         <OrderSummaryPanel />

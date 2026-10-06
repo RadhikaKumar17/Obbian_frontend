@@ -37,7 +37,7 @@ export default function ContactSupportDialog() {
           );
         }}
       >
-        <label className="block">
+        <label className="block text-[13px] font-medium">
           Email
           <Input
             name="email"
@@ -47,7 +47,7 @@ export default function ContactSupportDialog() {
             placeholder="you@example.com"
           />
         </label>
-        <label className="block">
+        <label className="block text-[13px] font-medium">
           How can we help?
           <Textarea
             name="message"

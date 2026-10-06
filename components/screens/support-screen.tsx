@@ -4,6 +4,7 @@ import { useObbian } from "@/components/obbian-provider";
 import PopularHelpPanel from "@/components/panels/popular-help-panel";
 import SupportCardPanel from "@/components/panels/support-card-panel";
 import Header from "@/components/ui/header";
+import { SearchIcon } from "@/components/ui/icons";
 import Input from "@/components/ui/input";
 
 export default function SupportScreen() {
@@ -14,14 +15,18 @@ export default function SupportScreen() {
         title="Support Centre"
         subtitle="Help with bookings, policies, payments and safety"
       />
-      <Input
-        aria-label="Search help articles"
-        value={helpQuery}
-        onChange={(e) => setHelpQuery(e.target.value)}
-        className="field !bg-white !py-5"
-        placeholder="⌕ Search help articles and rental policies"
-      />
-      <div className="my-7 grid gap-6 sm:grid-cols-3">
+      <div className="relative">
+        <SearchIcon size={19} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
+        <Input
+          aria-label="Search help articles"
+          type="search"
+          value={helpQuery}
+          onChange={(e) => setHelpQuery(e.target.value)}
+          className="!rounded-2xl !py-4 !pl-12 shadow-card"
+          placeholder="Search help articles and rental policies"
+        />
+      </div>
+      <div className="my-6 grid gap-5 sm:grid-cols-3">
         {[
           [
             "Policy assistant",

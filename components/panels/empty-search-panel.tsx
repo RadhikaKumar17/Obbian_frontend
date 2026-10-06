@@ -1,17 +1,13 @@
 "use client";
 
+import EmptyState from "@/components/ui/empty-state";
 import Go from "@/components/ui/go";
-import Panel from "@/components/ui/panel";
+import { CarIcon } from "@/components/ui/icons";
 
 export default function EmptySearchPanel() {
   return (
-    <Panel>
-      <h2 className="text-lg font-semibold">No rides found</h2>
-      <p className="muted mb-5 mt-2">
-        Increase your daily budget or search radius to see more
-        vehicles.
-      </p>
-      <Go href="/">Adjust filters</Go>
-    </Panel>
+    <EmptyState icon={<CarIcon size={22} />} title="No rides found" action={<Go href="/">Adjust filters</Go>}>
+      Increase your daily budget or search radius to see more vehicles.
+    </EmptyState>
   );
 }

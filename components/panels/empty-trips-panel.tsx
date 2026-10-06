@@ -1,22 +1,17 @@
 "use client";
 
 import { useObbian } from "@/components/obbian-provider";
+import EmptyState from "@/components/ui/empty-state";
 import Go from "@/components/ui/go";
-import Panel from "@/components/ui/panel";
+import { CalendarIcon } from "@/components/ui/icons";
 
 export default function EmptyTripsPanel() {
   const { tab } = useObbian();
   return (
-    <Panel>
-      <h2 className="text-lg font-semibold">
-        No {tab.toLowerCase()} trips
-      </h2>
-      <p className="muted my-4">
-        {tab === "Upcoming"
-          ? "Your next adventure starts with the right ride."
-          : "Trips with this status will appear here."}
-      </p>
-      <Go href="/">Discover vehicles</Go>
-    </Panel>
+    <EmptyState icon={<CalendarIcon size={22} />} title={`No ${tab.toLowerCase()} trips`} action={<Go href="/">Discover vehicles</Go>}>
+      {tab === "Upcoming"
+        ? "Your next adventure starts with the right ride."
+        : "Trips with this status will appear here."}
+    </EmptyState>
   );
 }

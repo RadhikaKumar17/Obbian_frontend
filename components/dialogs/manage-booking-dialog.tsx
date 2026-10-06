@@ -25,7 +25,7 @@ export default function ManageBookingDialog() {
             .catch((error) => setToast(error instanceof Error ? error.message : "Something went wrong."));
         }}
       >
-        <label className="block">
+        <label className="block text-[13px] font-medium">
           New pickup date
           <Input
             aria-label="New pickup date"
